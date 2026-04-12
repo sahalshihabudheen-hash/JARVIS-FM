@@ -81,7 +81,20 @@ const elements = {
     volDown: document.getElementById('vol-down'),
     prevBtn: document.getElementById('prev-station'),
     nextBtn: document.getElementById('next-station'),
-    playerBar: document.querySelector('.player-bar')
+    playerBar: document.querySelector('.player-bar'),
+    miniArtwork: document.getElementById('player-artwork'),
+    
+    // Expanded Player
+    expandedOverlay: document.getElementById('expanded-player'),
+    expandedClose: document.getElementById('close-expanded'),
+    expandedArtwork: document.getElementById('expanded-artwork'),
+    expandedBg: document.getElementById('expanded-bg'),
+    expandedName: document.getElementById('expanded-name'),
+    expandedGenre: document.getElementById('expanded-genre'),
+    expTogglePlay: document.getElementById('exp-toggle-play'),
+    expPrev: document.getElementById('exp-prev'),
+    expNext: document.getElementById('exp-next'),
+    expVolume: document.getElementById('exp-volume-slider')
 };
 
 // --- Initialization ---
@@ -341,6 +354,8 @@ function playStation(station) {
     elements.playerBar.classList.add('visible');
     document.body.classList.add('player-visible');
 
+    updateExpandedUI(station);
+
     const streamUrl = station.url_resolved || station.url;
 
     if (streamUrl.includes('.m3u8')) {
@@ -402,29 +417,54 @@ function togglePlay() {
 
 function updatePlayUI() {
     const playBtn = document.getElementById('toggle-play');
-    if (!playBtn) return;
+    const expPlayBtn = document.getElementById('exp-toggle-play');
     
-    // Replace the inner HTML to ensure Lucide can re-render the icon correctly
-    playBtn.innerHTML = `<i data-lucide="${state.isPlaying ? 'pause' : 'play'}"></i>`;
+    if (playBtn) {
+        playBtn.innerHTML = `<i data-lucide="${state.isPlaying ? 'pause' : 'play'}"></i>`;
+    }
+    if (expPlayBtn) {
+        expPlayBtn.innerHTML = `<i data-lucide="${state.isPlaying ? 'pause' : 'play'}"></i>`;
+    }
+    
     lucide.createIcons();
     
     // Toggle visualizer animation
-    const vis = document.getElementById('visualizer-pill');
-    if (vis) {
-        vis.style.opacity = state.isPlaying ? '1' : '0.3';
-        const bars = vis.querySelectorAll('.vis-bar');
+    const visContainers = [document.getElementById('visualizer-pill'), document.querySelector('.expanded-visualizer')];
+    visContainers.forEach(container => {
+        if (!container) return;
+        container.style.opacity = state.isPlaying ? '1' : '0.3';
+        const bars = container.querySelectorAll('.vis-bar');
         bars.forEach(bar => {
             bar.style.animationPlayState = state.isPlaying ? 'running' : 'paused';
         });
-    }
+    });
+}
+
+function updateExpandedUI(station) {
+    if (!station) return;
+    elements.expandedName.textContent = station.name;
+    elements.expandedGenre.textContent = station.tags.split(',').slice(0, 3).join(' • ') || 'Live Stream';
+    
+    const artwork = station.favicon || 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=400';
+    elements.expandedArtwork.src = artwork;
+    elements.expandedBg.style.backgroundImage = `url(${artwork})`;
 }
 
 function updateVolume(vol) {
     elements.audioPlayer.volume = vol;
     state.volume = vol;
+    
+    // Sync Mini Player
     elements.volumeSlider.value = vol;
     elements.volumeProgress.style.width = `${vol * 100}%`;
     elements.volumePercent.textContent = `${Math.round(vol * 100)}%`;
+    
+    // Sync Expanded Player
+    if (elements.expVolume) {
+        elements.expVolume.value = vol;
+        const expProgress = document.getElementById('exp-volume-progress');
+        if (expProgress) expProgress.style.width = `${vol * 100}%`;
+    }
 }
 
 // --- Event Listeners ---
@@ -527,6 +567,23 @@ function setupEventListeners() {
         localStorage.setItem('preferredGenres', JSON.stringify(selected));
         elements.onboardingModal.classList.add('hidden');
         fetchStations('topvote');
+    };
+
+    // Expanded Player Listeners
+    elements.miniArtwork.onclick = () => {
+        elements.expandedOverlay.classList.remove('hidden');
+    };
+
+    elements.expandedClose.onclick = () => {
+        elements.expandedOverlay.classList.add('hidden');
+    };
+
+    elements.expTogglePlay.onclick = togglePlay;
+    elements.expPrev.onclick = () => elements.prevBtn.click();
+    elements.expNext.onclick = () => elements.nextBtn.click();
+    
+    elements.expVolume.oninput = (e) => {
+        updateVolume(parseFloat(e.target.value));
     };
 }
 

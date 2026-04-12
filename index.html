@@ -156,6 +156,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Expanded Player Overlay -->
+    <div id="expanded-player" class="player-expanded-overlay hidden">
+        <button id="close-expanded" class="close-btn"><i data-lucide="chevron-down"></i></button>
+        <div class="expanded-bg" id="expanded-bg"></div>
+        <div class="expanded-content">
+            <div class="expanded-artwork-container">
+                <div class="expanded-artwork-glow" id="expanded-artwork-glow"></div>
+                <img id="expanded-artwork" src="" alt="Station Artwork">
+            </div>
+            <div class="expanded-info">
+                <span class="now-playing-label">Now Playing</span>
+                <h2 id="expanded-name">Nothing Playing</h2>
+                <p id="expanded-genre">Select a station</p>
+            </div>
+            
+            <div class="expanded-visualizer">
+                <div class="vis-bar" style="height: 20px;"></div>
+                <div class="vis-bar" style="height: 40px;"></div>
+                <div class="vis-bar" style="height: 30px;"></div>
+                <div class="vis-bar" style="height: 50px;"></div>
+                <div class="vis-bar" style="height: 25px;"></div>
+                <div class="vis-bar" style="height: 45px;"></div>
+                <div class="vis-bar" style="height: 35px;"></div>
+            </div>
+
+            <div class="expanded-controls">
+                <button class="control-btn-lg" id="exp-prev"><i data-lucide="skip-back"></i></button>
+                <button class="play-btn-lg" id="exp-toggle-play"><i data-lucide="play" id="exp-play-icon"></i></button>
+                <button class="control-btn-lg" id="exp-next"><i data-lucide="skip-forward"></i></button>
+            </div>
+            
+            <div class="expanded-volume">
+                <i data-lucide="volume-2"></i>
+                <div class="volume-slider-wrapper">
+                    <div class="volume-progress" id="exp-volume-progress"></div>
+                    <input type="range" id="exp-volume-slider" min="0" max="1" step="0.01" value="0.7">
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="module" src="./main.js"></script>
     <script>
         // Initialize Lucide icons
