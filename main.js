@@ -41,7 +41,7 @@ function showToast(message, type = 'info', duration = 4000) {
 function dismissToast(toast) {
     if (!toast || !toast.isConnected) return;
     toast.classList.add('toast-hide');
-    setTimeout(() => toast.remove(), 380);
+    setTimeout(() => { if (toast.isConnected) toast.remove(); }, 380);
 }
 
 // State Management
@@ -52,6 +52,7 @@ let state = {
     stations: [],
     location: null,
     activeType: 'topvote',
+    activeTag: null,
     preferredGenres: JSON.parse(localStorage.getItem('preferredGenres')) || [],
     recentlyPlayed: JSON.parse(localStorage.getItem('recentlyPlayed')) || []
 };
@@ -118,14 +119,17 @@ async function fetchStations(type, query = '') {
     if (type === 'topvote') {
         let tag = 'trending';
         if (state.preferredGenres.length > 0) {
-            tag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
+            // Stability: Keep the same tag for the session unless explicitly changed
+            if (!state.activeTag || !state.preferredGenres.includes(state.activeTag)) {
+                state.activeTag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
+            }
+            tag = state.activeTag;
         } else if (state.location && state.location.country_code === 'IN') {
             tag = 'malayalam';
         }
         url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
-        elements.sectionTitle.textContent = state.preferredGenres.length > 0
-            ? `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}`
-            : 'Recommended for You';
+        elements.sectionTitle.textContent = `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}`;
+        elements.sectionSubtitle.textContent = 'Personalized selection based on your vibe';
 
     } else if (type === 'topclick') {
         url = `${API_BASE}/stations/topclick/20`;
@@ -212,6 +216,13 @@ async function detectLocation() {
 // --- UI Rendering ---
 
 function renderStations(stations) {
+    // Check if the data is actually different to prevent jarring screen flashes
+    const stationIds = stations.map(s => s.stationuuid).join(',');
+    if (elements.stationList.getAttribute('data-last-ids') === stationIds) {
+        return;
+    }
+    elements.stationList.setAttribute('data-last-ids', stationIds);
+
     elements.stationList.innerHTML = '';
 
     if (stations.length === 0) {
@@ -402,10 +413,10 @@ function setupEventListeners() {
         const query = e.target.value;
         if (query.length > 2) {
             timeout = setTimeout(() => {
-                fetchStations('search', query).then(refreshAnimations);
+                fetchStations('search', query);
             }, 500);
         } else if (query.length === 0) {
-            fetchStations(state.activeType).then(refreshAnimations);
+            fetchStations(state.activeType);
         }
     };
 
@@ -416,7 +427,7 @@ function setupEventListeners() {
             item.classList.add('active');
             const type = item.getAttribute('data-type');
             state.activeType = type;
-            fetchStations(type).then(refreshAnimations);
+            fetchStations(type);
         };
     });
 
