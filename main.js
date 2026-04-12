@@ -318,9 +318,6 @@ function setupEventListeners() {
         };
     });
 
-        };
-    });
-
     // Player Controls
     elements.togglePlay.onclick = togglePlay;
 
