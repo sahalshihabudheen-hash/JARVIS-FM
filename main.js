@@ -12,7 +12,9 @@ let state = {
     volume: 0.7,
     stations: [],
     location: null,
-    activeType: 'topvote'
+    location: null,
+    activeType: 'topvote',
+    preferredGenres: JSON.parse(localStorage.getItem('preferredGenres')) || []
 };
 
 // UI Elements
@@ -30,7 +32,10 @@ const elements = {
     sectionTitle: document.getElementById('section-title'),
     navItems: document.querySelectorAll('.nav-item'),
     genreItems: document.querySelectorAll('.genre-item'),
-    genreChips: document.querySelectorAll('.chip')
+    genreChips: document.querySelectorAll('.chip'),
+    onboardingModal: document.getElementById('onboarding-modal'),
+    onboardingGenres: document.querySelectorAll('.onboarding-genre'),
+    finishOnboarding: document.getElementById('finish-onboarding')
 };
 
 // --- Initialization ---
@@ -38,7 +43,13 @@ const elements = {
 async function init() {
     setupEventListeners();
     await detectLocation();
-    fetchStations('topvote'); // Default view
+    
+    if (state.preferredGenres.length === 0) {
+        showOnboarding();
+    } else {
+        fetchStations('topvote');
+    }
+    
     setupVisualizer();
 }
 
@@ -50,10 +61,18 @@ async function fetchStations(type, query = '', params = {}) {
     
     switch(type) {
         case 'topvote':
-            // Hybrid view: Local stations first, then global top vote
-            const localTag = state.location?.country_code === 'IN' ? 'malayalam' : 'trending';
-            url = `${API_BASE}/stations/search?tag=${localTag}&limit=20&order=clickcount&reverse=true`;
-            elements.sectionTitle.textContent = `Recommended for You`;
+            // Personalized view based on preferred genres or location
+            let tag = 'trending';
+            if (state.preferredGenres.length > 0) {
+                // Pick a random preferred genre for variety each load
+                tag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
+            } else if (state.location?.country_code === 'IN') {
+                tag = 'malayalam';
+            }
+            url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
+            elements.sectionTitle.textContent = state.preferredGenres.length > 0 
+                ? `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}` 
+                : `Recommended for You`;
             break;
         case 'topclick':
             url = `${API_BASE}/stations/topclick/20`;
@@ -282,8 +301,34 @@ function setupEventListeners() {
             } else {
                 fetchStations('tag', tag);
             }
+    });
+
+    // Onboarding Listeners
+    elements.onboardingGenres.forEach(btn => {
+        btn.onclick = () => {
+            btn.classList.toggle('selected');
+            const selectedCount = document.querySelectorAll('.onboarding-genre.selected').length;
+            elements.finishOnboarding.disabled = selectedCount < 3;
+            if (selectedCount >= 3) {
+                elements.finishOnboarding.textContent = `Ready to Rock!`;
+            } else {
+                elements.finishOnboarding.textContent = `Pick ${3 - selectedCount} more`;
+            }
         };
     });
+
+    elements.finishOnboarding.onclick = () => {
+        const selected = Array.from(document.querySelectorAll('.onboarding-genre.selected'))
+            .map(btn => btn.getAttribute('data-tag'));
+        state.preferredGenres = selected;
+        localStorage.setItem('preferredGenres', JSON.stringify(selected));
+        elements.onboardingModal.classList.add('hidden');
+        fetchStations('topvote');
+    };
+}
+
+function showOnboarding() {
+    elements.onboardingModal.classList.remove('hidden');
 }
 
 // --- Visualizer Logic --- (Simplified/Removed for maximum compatibility)

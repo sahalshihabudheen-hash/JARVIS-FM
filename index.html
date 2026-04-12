@@ -110,6 +110,33 @@
             
             <audio id="audio-player" style="display:none"></audio>
         </footer>
+
+        <!-- Onboarding Modal -->
+        <div id="onboarding-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <h2>Welcome to Cosmic Radio</h2>
+                    <p>What kind of music do you vibe with? Pick at least 3.</p>
+                </div>
+                <div class="genre-selection-grid" id="onboarding-genres">
+                    <button class="onboarding-genre" data-tag="pop">Pop</button>
+                    <button class="onboarding-genre" data-tag="rock">Rock</button>
+                    <button class="onboarding-genre" data-tag="jazz">Jazz</button>
+                    <button class="onboarding-genre" data-tag="electronic">EDM</button>
+                    <button class="onboarding-genre" data-tag="classical">Classical</button>
+                    <button class="onboarding-genre" data-tag="lofi">Lofi</button>
+                    <button class="onboarding-genre" data-tag="hiphop">Hip Hop</button>
+                    <button class="onboarding-genre" data-tag="relax">Relax</button>
+                    <button class="onboarding-genre" data-tag="news">News</button>
+                    <button class="onboarding-genre" data-tag="islamic">Islamic</button>
+                    <button class="onboarding-genre" data-tag="malayalam">Malayalam</button>
+                    <button class="onboarding-genre" data-tag="bollywood">Bollywood</button>
+                </div>
+                <div class="modal-footer">
+                    <button id="finish-onboarding" class="primary-btn" disabled>Start Listening</button>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="module" src="./main.js"></script>
     <script>
