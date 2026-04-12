@@ -2,7 +2,9 @@
  * JARVIS FM - Core Logic
  */
 
-const API_BASE = 'https://de1.api.radio-browser.info/json';
+const MIRRORS = ['de1', 'nl1', 'at1'];
+const API_MIRROR = MIRRORS[Math.floor(Math.random() * MIRRORS.length)];
+const API_BASE = `https://${API_MIRROR}.api.radio-browser.info/json`;
 const USER_AGENT = 'JARVIS-FM/1.0';
 
 // --- Toast Notification System ---
@@ -86,11 +88,21 @@ const elements = {
 
 async function init() {
     setupEventListeners();
-    await detectLocation();
+    
+    // Non-blocking location detection
+    detectLocation();
+
+    // Load from cache first for instant UI
+    const cached = localStorage.getItem('cachedStations');
+    if (cached) {
+        state.stations = JSON.parse(cached);
+        renderStations(state.stations);
+    }
 
     if (state.preferredGenres.length === 0) {
         showOnboarding();
     } else {
+        // Fetch fresh data in the background
         fetchStations('topvote');
     }
 
@@ -152,27 +164,48 @@ async function fetchStations(type, query = '') {
     }
 
     try {
-        const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } });
+        const response = await fetch(url, { 
+            headers: { 'User-Agent': USER_AGENT },
+            signal: AbortSignal.timeout(8000) // Timeout after 8s
+        });
         const data = await response.json();
         state.stations = data;
+        
+        // Cache the results for next time
+        if (type === 'topvote' || type === 'topclick') {
+            localStorage.setItem('cachedStations', JSON.stringify(data));
+        }
+        
         renderStations(data);
     } catch (error) {
         console.error('Error fetching stations:', error);
-        elements.stationList.innerHTML = '<p class="error">Failed to load stations. Please try again.</p>';
-        showToast('Could not load stations. Check your connection.', 'error');
+        // Only show error if we have no cached data to show
+        if (elements.stationList.children.length <= 1) {
+            elements.stationList.innerHTML = '<p class="error">Failed to load stations. Please check your connection.</p>';
+        }
+        showToast('API is slow or unreachable. Showing last known stations.', 'warning');
     }
 }
 
 // --- Location Logic ---
 
 async function detectLocation() {
-    try {
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
+    // Check cache first
+    const cachedLoc = localStorage.getItem('userLocation');
+    if (cachedLoc) {
+        const data = JSON.parse(cachedLoc);
         state.location = data;
         elements.locationText.textContent = `${data.city}, ${data.country_name}`;
+    }
+
+    try {
+        const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+        const data = await response.json();
+        state.location = data;
+        localStorage.setItem('userLocation', JSON.stringify(data));
+        elements.locationText.textContent = `${data.city}, ${data.country_name}`;
     } catch (e) {
-        elements.locationText.textContent = 'Unknown Location';
+        if (!state.location) elements.locationText.textContent = 'Global Mode';
     }
 }
 
@@ -229,7 +262,10 @@ function renderStations(stations) {
 }
 
 function showLoader() {
-    elements.stationList.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+    // Only show the big loader if the grid is empty (first load)
+    if (elements.stationList.children.length === 0 || elements.stationList.querySelector('.no-results')) {
+        elements.stationList.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+    }
 }
 
 function refreshAnimations() {
