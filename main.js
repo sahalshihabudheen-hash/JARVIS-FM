@@ -5,6 +5,43 @@
 const API_BASE = 'https://de1.api.radio-browser.info/json';
 const USER_AGENT = 'JARVIS-FM/1.0';
 
+// --- Toast Notification System ---
+const TOAST_ICONS = { error: '⚡', success: '✅', info: 'ℹ️', warning: '⚠️' };
+const TOAST_TITLES = { error: 'Stream Error', success: 'Now Playing', info: 'Info', warning: 'Heads Up' };
+
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${TOAST_ICONS[type]}</span>
+        <div class="toast-body">
+            <div class="toast-title">${TOAST_TITLES[type]}</div>
+            <div class="toast-msg">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    // Click anywhere on toast to dismiss
+    toast.onclick = (e) => {
+        if (e.target.classList.contains('toast-close')) return;
+        dismissToast(toast);
+    };
+
+    container.appendChild(toast);
+
+    // Auto-dismiss
+    setTimeout(() => dismissToast(toast), duration);
+}
+
+function dismissToast(toast) {
+    if (!toast || !toast.isConnected) return;
+    toast.classList.add('toast-hide');
+    setTimeout(() => toast.remove(), 380);
+}
+
 // State Management
 let state = {
     currentStation: null,
@@ -104,6 +141,7 @@ async function fetchStations(type, query = '') {
     } catch (error) {
         console.error('Error fetching stations:', error);
         elements.stationList.innerHTML = '<p class="error">Failed to load stations. Please try again.</p>';
+        showToast('Could not load stations. Check your connection.', 'error');
     }
 }
 
@@ -198,13 +236,13 @@ function playStation(station) {
                 startPlayback();
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) alert('This HLS stream failed to load.');
+                if (data.fatal) showToast('This HLS stream failed to load. Try another station.', 'error');
             });
         } else if (elements.audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
             elements.audioPlayer.src = streamUrl;
             startPlayback();
         } else {
-            alert("Your browser doesn't support this stream format.");
+            showToast("Your browser doesn't support this stream format.", 'warning');
         }
     } else {
         elements.audioPlayer.src = streamUrl;
@@ -221,7 +259,7 @@ function startPlayback() {
         })
         .catch(err => {
             console.error('Playback failed:', err);
-            alert('This stream is currently unavailable. Try another station.');
+            showToast('Stream unavailable. Trying another station might help!', 'error');
         });
 }
 
