@@ -176,6 +176,17 @@ function playStation(station) {
     elements.currentStationName.textContent = station.name;
     elements.currentStationGenre.textContent = station.tags.split(',').slice(0, 3).join(' • ') || 'Live Stream';
 
+    // Update player artwork
+    const artwork = document.getElementById('player-artwork');
+    if (artwork) {
+        if (station.favicon) {
+            artwork.innerHTML = `<img src="${station.favicon}" onerror="this.parentElement.innerHTML='<i data-lucide=\\'radio\\'></i>'; lucide.createIcons();" alt="${station.name}">`;
+        } else {
+            artwork.innerHTML = `<i data-lucide="radio"></i>`;
+            lucide.createIcons();
+        }
+    }
+
     const streamUrl = station.url_resolved || station.url;
 
     if (streamUrl.includes('.m3u8')) {

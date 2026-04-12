@@ -84,48 +84,53 @@
         </main>
 
         <!-- Fixed Player Bar -->
-        <footer class="player-bar glass">
+        <footer class="player-bar">
+            <div class="player-glow-border"></div>
+
+            <!-- Left: Artwork + Info + Visualizer -->
             <div class="player-left">
-                <div class="visualizer-pill">
-                    <div class="vis-bar"></div>
-                    <div class="vis-bar"></div>
-                    <div class="vis-bar"></div>
-                    <div class="vis-bar"></div>
-                    <div class="vis-bar"></div>
+                <div class="player-artwork" id="player-artwork">
+                    <i data-lucide="radio"></i>
                 </div>
-                <div class="now-playing">
-                    <div class="station-info">
-                        <h4 id="current-station-name">Nothing Playing</h4>
-                        <p id="current-station-genre">Select a station</p>
-                    </div>
+                <div class="player-info">
+                    <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+                    <h4 id="current-station-name">Nothing Playing</h4>
+                    <p id="current-station-genre">Select a station to begin</p>
+                </div>
+                <div class="visualizer-pill" id="visualizer-pill">
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
                 </div>
             </div>
 
+            <!-- Center: Controls -->
             <div class="player-center">
-                <button class="control-btn" id="prev-station">
+                <button class="control-btn" id="prev-station" title="Previous">
                     <i data-lucide="skip-back"></i>
                 </button>
                 <button id="toggle-play" class="play-btn-main" disabled>
                     <i data-lucide="play" id="play-icon"></i>
                 </button>
-                <button class="control-btn" id="next-station">
+                <button class="control-btn" id="next-station" title="Next">
                     <i data-lucide="skip-forward"></i>
                 </button>
             </div>
 
+            <!-- Right: Volume -->
             <div class="player-right">
-                <div class="volume-control-group">
-                    <button class="vol-adj" id="vol-down">-</button>
-                    <i data-lucide="volume-2" class="volume-icon"></i>
-                    <div class="volume-slider-wrapper">
-                        <div class="volume-progress" id="volume-progress"></div>
-                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
-                    </div>
-                    <button class="vol-adj" id="vol-up">+</button>
-                    <span id="volume-percent">70%</span>
+                <i data-lucide="volume-2" class="volume-icon"></i>
+                <div class="volume-slider-wrapper">
+                    <div class="volume-progress" id="volume-progress"></div>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
                 </div>
+                <span id="volume-percent">70%</span>
             </div>
-            
+
             <audio id="audio-player" style="display:none"></audio>
         </footer>
 
