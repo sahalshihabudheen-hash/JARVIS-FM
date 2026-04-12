@@ -2,10 +2,9 @@
  * JARVIS FM - Core Logic
  */
 
-const MIRRORS = ['de1', 'nl1', 'at1'];
-const API_MIRROR = MIRRORS[Math.floor(Math.random() * MIRRORS.length)];
-const API_BASE = `https://${API_MIRROR}.api.radio-browser.info/json`;
+const API_BASE = `https://all.api.radio-browser.info/json`;
 const USER_AGENT = 'JARVIS-FM/1.0';
+let activeFetchController = null;
 
 // --- Toast Notification System ---
 const TOAST_ICONS = { error: '⚡', success: '✅', info: 'ℹ️', warning: '⚠️' };
@@ -113,6 +112,13 @@ async function init() {
 // --- API Logic ---
 
 async function fetchStations(type, query = '') {
+    // Abort any ongoing fetch to prevent speed-clogging and toast spam
+    if (activeFetchController) {
+        activeFetchController.abort();
+    }
+    activeFetchController = new AbortController();
+    const signal = activeFetchController.signal;
+
     showLoader();
     let url = '';
 
@@ -170,25 +176,43 @@ async function fetchStations(type, query = '') {
     try {
         const response = await fetch(url, { 
             headers: { 'User-Agent': USER_AGENT },
-            signal: AbortSignal.timeout(8000) // Timeout after 8s
+            signal: signal,
+            // Combined signal for timeout
+            signal: anySignal([signal, AbortSignal.timeout(10000)]) 
         });
         const data = await response.json();
         state.stations = data;
         
-        // Cache the results for next time
         if (type === 'topvote' || type === 'topclick') {
             localStorage.setItem('cachedStations', JSON.stringify(data));
         }
         
         renderStations(data);
     } catch (error) {
+        if (error.name === 'AbortError') return; // Ignore intentional cancellations
+        
         console.error('Error fetching stations:', error);
-        // Only show error if we have no cached data to show
         if (elements.stationList.children.length <= 1) {
-            elements.stationList.innerHTML = '<p class="error">Failed to load stations. Please check your connection.</p>';
+            elements.stationList.innerHTML = '<p class="error">The radio database is taking a bit too long to respond. Try again in a moment.</p>';
         }
-        showToast('API is slow or unreachable. Showing last known stations.', 'warning');
+    } finally {
+        if (activeFetchController && activeFetchController.signal === signal) {
+            activeFetchController = null;
+        }
     }
+}
+
+// Utility to combine abort signals
+function anySignal(signals) {
+    const controller = new AbortController();
+    for (const signal of signals) {
+        if (signal.aborted) {
+            controller.abort();
+            return signal;
+        }
+        signal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+    return controller.signal;
 }
 
 // --- Location Logic ---
