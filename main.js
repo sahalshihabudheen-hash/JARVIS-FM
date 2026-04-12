@@ -67,7 +67,7 @@ const elements = {
     sectionTitle: document.getElementById('section-title'),
     navItems: document.querySelectorAll('.nav-item'),
     genreItems: document.querySelectorAll('.genre-item'),
-    genreChips: document.querySelectorAll('.chip'),
+
     onboardingModal: document.getElementById('onboarding-modal'),
     onboardingGenres: document.querySelectorAll('.onboarding-genre'),
     finishOnboarding: document.getElementById('finish-onboarding'),
@@ -394,21 +394,6 @@ function setupEventListeners() {
         }
     };
 
-    // Genre Chips
-    elements.genreChips.forEach(chip => {
-        chip.onclick = () => {
-            elements.genreChips.forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            const tag = chip.getAttribute('data-tag');
-            if (tag === 'trending') {
-                fetchStations('topvote').then(refreshAnimations);
-            } else if (tag === 'malayalam') {
-                fetchStations('local').then(refreshAnimations);
-            } else {
-                fetchStations('tag', tag).then(refreshAnimations);
-            }
-        };
-    });
 
     // Onboarding Listeners
     elements.onboardingGenres.forEach(btn => {
