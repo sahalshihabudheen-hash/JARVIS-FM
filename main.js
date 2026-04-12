@@ -290,8 +290,22 @@ function togglePlay() {
 }
 
 function updatePlayUI() {
-    elements.playIcon.setAttribute('data-lucide', state.isPlaying ? 'pause' : 'play');
+    const playBtn = document.getElementById('toggle-play');
+    if (!playBtn) return;
+    
+    // Replace the inner HTML to ensure Lucide can re-render the icon correctly
+    playBtn.innerHTML = `<i data-lucide="${state.isPlaying ? 'pause' : 'play'}"></i>`;
     lucide.createIcons();
+    
+    // Toggle visualizer animation
+    const vis = document.getElementById('visualizer-pill');
+    if (vis) {
+        vis.style.opacity = state.isPlaying ? '1' : '0.3';
+        const bars = vis.querySelectorAll('.vis-bar');
+        bars.forEach(bar => {
+            bar.style.animationPlayState = state.isPlaying ? 'running' : 'paused';
+        });
+    }
 }
 
 function updateVolume(vol) {
@@ -329,6 +343,25 @@ function setupEventListeners() {
             fetchStations(type).then(refreshAnimations);
         };
     });
+
+    // Audio Player Sync
+    elements.audioPlayer.onplay = () => {
+        state.isPlaying = true;
+        updatePlayUI();
+    };
+
+    elements.audioPlayer.onpause = () => {
+        state.isPlaying = false;
+        updatePlayUI();
+    };
+
+    elements.audioPlayer.onwaiting = () => {
+        elements.togglePlay.classList.add('loading');
+    };
+
+    elements.audioPlayer.onplaying = () => {
+        elements.togglePlay.classList.remove('loading');
+    };
 
     // Player Controls
     elements.togglePlay.onclick = togglePlay;
