@@ -64,6 +64,7 @@ const elements = {
     volumeSlider: document.getElementById('volume-slider'),
     currentStationName: document.getElementById('current-station-name'),
     currentStationGenre: document.getElementById('current-station-genre'),
+    sectionTitle: document.getElementById('section-title'),
     navItems: document.querySelectorAll('.nav-item'),
     genreItems: document.querySelectorAll('.genre-item'),
     genreChips: document.querySelectorAll('.chip'),
@@ -108,16 +109,29 @@ async function fetchStations(type, query = '') {
             tag = 'malayalam';
         }
         url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = state.preferredGenres.length > 0
+            ? `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}`
+            : 'Recommended for You';
+
     } else if (type === 'topclick') {
         url = `${API_BASE}/stations/topclick/20`;
+        elements.sectionTitle.textContent = 'Most Popular';
+
     } else if (type === 'search') {
         url = `${API_BASE}/stations/search?name=${query}&limit=50&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = `Results for "${query}"`;
+
     } else if (type === 'tag') {
         url = `${API_BASE}/stations/bytag/${query}?limit=30&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
+
     } else if (type === 'local') {
         url = `${API_BASE}/stations/search?language=malayalam&order=clickcount&reverse=true&limit=60`;
+        elements.sectionTitle.textContent = 'Malayalam Stations (Kerala)';
+
     } else if (type === 'islamic') {
         url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = 'Islamic & Peace Radio';
     }
 
     try {
@@ -304,11 +318,6 @@ function setupEventListeners() {
         };
     });
 
-    // Genres
-    elements.genreItems.forEach(item => {
-        item.onclick = () => {
-            const tag = item.getAttribute('data-tag');
-            fetchStations('tag', tag);
         };
     });
 
