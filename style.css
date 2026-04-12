@@ -135,7 +135,7 @@ body {
 
 .genre-item:hover {
     color: var(--accent);
-    background: rgba(139, 92, 246, 0.1);
+    background: rgba(0, 229, 255, 0.08);
 }
 
 /* Main Content Styling */
@@ -144,7 +144,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding-bottom: 120px; /* Space for player bar */
+    padding-bottom: 110px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--accent) transparent;
@@ -339,9 +339,9 @@ h2 {
     align-items: center;
     padding: 0 30px;
     z-index: 200;
-    background: rgba(5, 7, 10, 0.92);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
+    background: #05070a;
+    border-top: 1px solid rgba(0, 229, 255, 0.12);
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.8);
 }
 
 .player-glow-border {
