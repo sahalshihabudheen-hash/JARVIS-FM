@@ -12,7 +12,6 @@ let state = {
     volume: 0.7,
     stations: [],
     location: null,
-    location: null,
     activeType: 'topvote',
     preferredGenres: JSON.parse(localStorage.getItem('preferredGenres')) || []
 };
@@ -28,14 +27,19 @@ const elements = {
     volumeSlider: document.getElementById('volume-slider'),
     currentStationName: document.getElementById('current-station-name'),
     currentStationGenre: document.getElementById('current-station-genre'),
-    currentArtwork: document.getElementById('current-artwork'),
     sectionTitle: document.getElementById('section-title'),
     navItems: document.querySelectorAll('.nav-item'),
     genreItems: document.querySelectorAll('.genre-item'),
     genreChips: document.querySelectorAll('.chip'),
     onboardingModal: document.getElementById('onboarding-modal'),
     onboardingGenres: document.querySelectorAll('.onboarding-genre'),
-    finishOnboarding: document.getElementById('finish-onboarding')
+    finishOnboarding: document.getElementById('finish-onboarding'),
+    volumeProgress: document.getElementById('volume-progress'),
+    volumePercent: document.getElementById('volume-percent'),
+    volUp: document.getElementById('vol-up'),
+    volDown: document.getElementById('vol-down'),
+    prevBtn: document.getElementById('prev-station'),
+    nextBtn: document.getElementById('next-station')
 };
 
 // --- Initialization ---
@@ -182,13 +186,6 @@ function playStation(station) {
     state.currentStation = station;
     elements.currentStationName.textContent = station.name;
     elements.currentStationGenre.textContent = station.tags.split(',').slice(0, 3).join(' • ') || 'Live Stream';
-    
-    if (station.favicon) {
-        elements.currentArtwork.innerHTML = `<img src="${station.favicon}" alt="${station.name}">`;
-    } else {
-        elements.currentArtwork.innerHTML = `<i data-lucide="music"></i>`;
-        lucide.createIcons();
-    }
 
     const streamUrl = station.url_resolved || station.url;
     
@@ -245,6 +242,14 @@ function updatePlayUI() {
     lucide.createIcons();
 }
 
+function updateVolume(vol) {
+    elements.audioPlayer.volume = vol;
+    state.volume = vol;
+    elements.volumeSlider.value = vol;
+    elements.volumeProgress.style.width = `${vol * 100}%`;
+    elements.volumePercent.textContent = `${Math.round(vol * 100)}%`;
+}
+
 // --- Event Listeners ---
 
 function setupEventListeners() {
@@ -283,8 +288,33 @@ function setupEventListeners() {
     elements.togglePlay.onclick = togglePlay;
     elements.volumeSlider.oninput = (e) => {
         const vol = e.target.value;
-        elements.audioPlayer.volume = vol;
-        state.volume = vol;
+        updateVolume(vol);
+    };
+
+    elements.volUp.onclick = () => {
+        const newVol = Math.min(1, state.volume + 0.1);
+        updateVolume(newVol);
+    };
+
+    elements.volDown.onclick = () => {
+        const newVol = Math.max(0, state.volume - 0.1);
+        updateVolume(newVol);
+    };
+
+    // Station Skipping
+    elements.nextBtn.onclick = () => {
+        if (state.stations.length > 0) {
+            const nextIdx = (state.stations.indexOf(state.currentStation) + 1) % state.stations.length;
+            playStation(state.stations[nextIdx]);
+        }
+    };
+
+    elements.prevBtn.onclick = () => {
+        if (state.stations.length > 0) {
+            const currentIdx = state.stations.indexOf(state.currentStation);
+            const prevIdx = (currentIdx - 1 + state.stations.length) % state.stations.length;
+            playStation(state.stations[prevIdx]);
+        }
     };
 
     // Genre Chips

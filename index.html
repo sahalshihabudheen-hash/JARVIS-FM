@@ -84,28 +84,45 @@
 
         <!-- Fixed Player Bar -->
         <footer class="player-bar glass">
-            <div class="now-playing">
-                <div class="station-artwork glass" id="current-artwork">
-                    <i data-lucide="music"></i>
+            <div class="player-left">
+                <div class="visualizer-pill">
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
                 </div>
-                <div class="station-info">
-                    <h4 id="current-station-name">Nothing Playing</h4>
-                    <p id="current-station-genre">Select a station to start</p>
+                <div class="now-playing">
+                    <div class="station-info">
+                        <h4 id="current-station-name">Nothing Playing</h4>
+                        <p id="current-station-genre">Select a station</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="player-controls">
-                <button id="toggle-play" class="play-btn glass" disabled>
+            <div class="player-center">
+                <button class="control-btn" id="prev-station">
+                    <i data-lucide="skip-back"></i>
+                </button>
+                <button id="toggle-play" class="play-btn-main" disabled>
                     <i data-lucide="play" id="play-icon"></i>
                 </button>
-                <div class="volume-container">
-                    <i data-lucide="volume-2" class="volume-icon"></i>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
-                </div>
+                <button class="control-btn" id="next-station">
+                    <i data-lucide="skip-forward"></i>
+                </button>
             </div>
 
-            <div class="visualizer-container">
-                <canvas id="visualizer"></canvas>
+            <div class="player-right">
+                <div class="volume-control-group">
+                    <button class="vol-adj" id="vol-down">-</button>
+                    <i data-lucide="volume-2" class="volume-icon"></i>
+                    <div class="volume-slider-wrapper">
+                        <div class="volume-progress" id="volume-progress"></div>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
+                    </div>
+                    <button class="vol-adj" id="vol-up">+</button>
+                    <span id="volume-percent">70%</span>
+                </div>
             </div>
             
             <audio id="audio-player" style="display:none"></audio>
