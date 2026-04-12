@@ -50,7 +50,8 @@ let state = {
     stations: [],
     location: null,
     activeType: 'topvote',
-    preferredGenres: JSON.parse(localStorage.getItem('preferredGenres')) || []
+    preferredGenres: JSON.parse(localStorage.getItem('preferredGenres')) || [],
+    recentlyPlayed: JSON.parse(localStorage.getItem('recentlyPlayed')) || []
 };
 
 // UI Elements
@@ -65,6 +66,7 @@ const elements = {
     currentStationName: document.getElementById('current-station-name'),
     currentStationGenre: document.getElementById('current-station-genre'),
     sectionTitle: document.getElementById('section-title'),
+    sectionSubtitle: document.getElementById('section-subtitle'),
     navItems: document.querySelectorAll('.nav-item'),
     genreItems: document.querySelectorAll('.genre-item'),
 
@@ -131,7 +133,22 @@ async function fetchStations(type, query = '') {
 
     } else if (type === 'islamic') {
         url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
-        elements.sectionTitle.textContent = 'Islamic & Peace Radio';
+        elements.sectionTitle.textContent = 'Peace & Serenity';
+        elements.sectionSubtitle.textContent = 'Spiritual and calming signals from around the world';
+
+    } else if (type === 'history') {
+        renderStations(state.recentlyPlayed);
+        elements.sectionTitle.textContent = 'Recently Played';
+        elements.sectionSubtitle.textContent = 'Pick up where you left off';
+        return; 
+    }
+
+    if (type === 'topvote') {
+        elements.sectionSubtitle.textContent = 'Personalized selection based on your vibe';
+    } else if (type === 'topclick') {
+        elements.sectionSubtitle.textContent = 'What everyone is listening to right now';
+    } else if (type === 'local') {
+        elements.sectionSubtitle.textContent = 'Bringing the local community direct to your ears';
     }
 
     try {
@@ -169,16 +186,28 @@ function renderStations(stations) {
         return;
     }
 
-    stations.forEach(station => {
+    stations.forEach((station, index) => {
         const card = document.createElement('div');
-        card.className = 'station-card glass';
+        
+        // Randomly assign varied layout classes for a "human" feel
+        const isFeatured = index === 0 && stations.length > 5;
+        card.className = `station-card glass ${isFeatured ? 'card-featured' : ''}`;
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" onerror="this.style.display='none'" alt="${station.name}">`
+            ? `<img src="${artwork}" onerror="this.src='https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=260&auto=format&fit=crop'; this.onerror=null;" alt="${station.name}">`
             : `<i data-lucide="radio"></i>`;
 
+        // Add contextual badges
+        let badgeHtml = '';
+        if (index < 3 && state.activeType === 'topvote') {
+            badgeHtml = `<div class="card-badge badge-popular"><i data-lucide="trending-up" style="width:10px;height:10px"></i> Popular</div>`;
+        } else if (Math.random() > 0.7) {
+            badgeHtml = `<div class="card-badge badge-live">Live</div>`;
+        }
+
         card.innerHTML = `
+            ${badgeHtml}
             <div class="station-card-artwork">
                 ${artworkHtml}
                 <div class="play-overlay">
@@ -187,7 +216,8 @@ function renderStations(stations) {
             </div>
             <div class="station-card-info">
                 <h5>${station.name}</h5>
-                <p>${station.tags.split(',').slice(0, 2).join(', ') || 'Global'}</p>
+                <p>${station.tags.split(',').slice(0, 2).join(' • ') || 'Global Radio'}</p>
+                ${isFeatured ? '<span class="featured-label">Curated for you</span>' : ''}
             </div>
         `;
 
@@ -263,6 +293,16 @@ function playStation(station) {
         elements.audioPlayer.src = streamUrl;
         startPlayback();
     }
+
+    // Update Recently Played
+    addToRecentlyPlayed(station);
+}
+
+function addToRecentlyPlayed(station) {
+    let recent = state.recentlyPlayed.filter(s => s.stationuuid !== station.stationuuid);
+    recent.unshift(station);
+    state.recentlyPlayed = recent.slice(0, 10);
+    localStorage.setItem('recentlyPlayed', JSON.stringify(state.recentlyPlayed));
 }
 
 function startPlayback() {
