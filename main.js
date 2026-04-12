@@ -76,7 +76,8 @@ const elements = {
     volUp: document.getElementById('vol-up'),
     volDown: document.getElementById('vol-down'),
     prevBtn: document.getElementById('prev-station'),
-    nextBtn: document.getElementById('next-station')
+    nextBtn: document.getElementById('next-station'),
+    playerBar: document.querySelector('.player-bar')
 };
 
 // --- Initialization ---
@@ -224,6 +225,10 @@ function playStation(station) {
             lucide.createIcons();
         }
     }
+
+    // Show the player bar and adjust layout
+    elements.playerBar.classList.add('visible');
+    document.body.classList.add('player-visible');
 
     const streamUrl = station.url_resolved || station.url;
 
