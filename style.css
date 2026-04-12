@@ -2,11 +2,12 @@
     --bg-dark: #07090d;
     --card-bg: rgba(255, 255, 255, 0.05);
     --card-border: rgba(255, 255, 255, 0.1);
-    --accent: #facd15;
-    --accent-glow: rgba(250, 205, 21, 0.5);
+    --accent: #00e5ff;
+    --accent-glow: rgba(0, 229, 255, 0.4);
     --text-main: #f8fafc;
     --text-dim: #94a3b8;
-    --gradient: linear-gradient(135deg, #facd15 0%, #ff9f0a 100%);
+    --gradient: linear-gradient(135deg, #00e5ff 0%, #007bff 100%);
+    --bg-dark: #05070a;
     --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     --sidebar-width: 260px;
 }
@@ -65,10 +66,15 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-.logo-icon {
-    stroke: #8b5cf6;
-    width: 32px;
-    height: 32px;
+.logo-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.modal-logo {
+    width: 120px;
+    margin-bottom: 20px;
 }
 
 .nav-links {
@@ -423,10 +429,10 @@ h2 {
 }
 
 .play-btn-main i {
-    color: #000;
+    color: #fff;
     width: 28px;
     height: 28px;
-    fill: #000;
+    fill: #fff;
 }
 
 .play-btn-main:hover {

@@ -3,7 +3,7 @@
  */
 
 const API_BASE = 'https://de1.api.radio-browser.info/json';
-const USER_AGENT = 'CosmicRadio/1.0';
+const USER_AGENT = 'JARVIS-FM/1.0';
 
 // State Management
 let state = {
