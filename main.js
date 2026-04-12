@@ -83,6 +83,8 @@ const elements = {
     nextBtn: document.getElementById('next-station'),
     playerBar: document.querySelector('.player-bar'),
     miniArtwork: document.getElementById('player-artwork'),
+    expandTrigger: document.getElementById('player-expand-trigger'),
+    liveBadge: document.getElementById('live-status-badge'),
     
     // Expanded Player
     expandedOverlay: document.getElementById('expanded-player'),
@@ -428,6 +430,12 @@ function updatePlayUI() {
     
     lucide.createIcons();
     
+    // Toggle Live Badge visibility
+    if (elements.liveBadge) {
+        elements.liveBadge.style.display = state.isPlaying ? 'flex' : 'none';
+        elements.liveBadge.style.opacity = state.isPlaying ? '1' : '0';
+    }
+    
     // Toggle visualizer animation
     const visContainers = [document.getElementById('visualizer-pill'), document.querySelector('.expanded-visualizer')];
     visContainers.forEach(container => {
@@ -570,9 +578,10 @@ function setupEventListeners() {
     };
 
     // Expanded Player Listeners
-    elements.miniArtwork.onclick = () => {
-        elements.expandedOverlay.classList.remove('hidden');
-    };
+    const openPlayer = () => elements.expandedOverlay.classList.remove('hidden');
+    
+    elements.miniArtwork.onclick = openPlayer;
+    if (elements.expandTrigger) elements.expandTrigger.onclick = openPlayer;
 
     elements.expandedClose.onclick = () => {
         elements.expandedOverlay.classList.add('hidden');
