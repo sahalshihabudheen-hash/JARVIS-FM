@@ -202,6 +202,16 @@ function showLoader() {
     elements.stationList.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
 }
 
+function refreshAnimations() {
+    const cards = elements.stationList.querySelectorAll('.station-card');
+    cards.forEach((card, index) => {
+        card.style.animation = 'none';
+        card.offsetHeight; // trigger reflow
+        card.style.animation = '';
+        card.style.animationDelay = `${Math.min(index * 0.05, 0.5)}s`;
+    });
+}
+
 // --- Player Logic ---
 let hls = null;
 
@@ -301,9 +311,11 @@ function setupEventListeners() {
         clearTimeout(timeout);
         const query = e.target.value;
         if (query.length > 2) {
-            timeout = setTimeout(() => fetchStations('search', query), 500);
+            timeout = setTimeout(() => {
+                fetchStations('search', query).then(refreshAnimations);
+            }, 500);
         } else if (query.length === 0) {
-            fetchStations(state.activeType);
+            fetchStations(state.activeType).then(refreshAnimations);
         }
     };
 
@@ -314,7 +326,7 @@ function setupEventListeners() {
             item.classList.add('active');
             const type = item.getAttribute('data-type');
             state.activeType = type;
-            fetchStations(type);
+            fetchStations(type).then(refreshAnimations);
         };
     });
 
@@ -356,11 +368,11 @@ function setupEventListeners() {
             chip.classList.add('active');
             const tag = chip.getAttribute('data-tag');
             if (tag === 'trending') {
-                fetchStations('topvote');
+                fetchStations('topvote').then(refreshAnimations);
             } else if (tag === 'malayalam') {
-                fetchStations('local');
+                fetchStations('local').then(refreshAnimations);
             } else {
-                fetchStations('tag', tag);
+                fetchStations('tag', tag).then(refreshAnimations);
             }
         };
     });

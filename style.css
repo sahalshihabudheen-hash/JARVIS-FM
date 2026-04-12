@@ -22,11 +22,27 @@
 body {
     background: var(--bg-dark);
     background-image: 
-        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
+        radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 123, 255, 0.03) 0%, transparent 40%);
     color: var(--text-main);
     height: 100vh;
     overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes background-pulse {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 100%; }
 }
 
 #app {
@@ -258,16 +274,23 @@ h2 {
 /* Station Card Styling */
 .station-card {
     padding: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    animation: card-reveal 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+@keyframes card-reveal {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .station-card:hover {
     transform: translateY(-8px);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12);
     border-color: var(--accent);
+    box-shadow: 0 12px 24px rgba(0, 229, 255, 0.12);
 }
 
 .station-card-artwork {
@@ -854,7 +877,21 @@ h2 {
     flex-shrink: 0;
 }
 .toast-close:hover { color: #fff; }
+/* Staggered animation delay for cards */
+.station-card:nth-child(1) { animation-delay: 0.05s; }
+.station-card:nth-child(2) { animation-delay: 0.1s; }
+.station-card:nth-child(3) { animation-delay: 0.15s; }
+.station-card:nth-child(4) { animation-delay: 0.2s; }
+.station-card:nth-child(5) { animation-delay: 0.25s; }
+.station-card:nth-child(6) { animation-delay: 0.3s; }
+.station-card:nth-child(7) { animation-delay: 0.35s; }
+.station-card:nth-child(8) { animation-delay: 0.4s; }
+.station-card:nth-child(n+9) { animation-delay: 0.45s; }
 
+/* Micro-animations */
+.nav-item:active { transform: scale(0.95); }
+.chip:active { transform: scale(0.9); }
+.play-btn-main:active { transform: scale(0.85); outline: 2px solid var(--accent); }
 @keyframes toast-in {
     from { opacity: 0; transform: translateX(60px) scale(0.9); }
     to   { opacity: 1; transform: translateX(0)    scale(1);   }
