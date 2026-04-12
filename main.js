@@ -1,5 +1,5 @@
 /**
- * Cosmic Radio - Core Logic
+ * JARVIS FM - Core Logic
  */
 
 const API_BASE = 'https://de1.api.radio-browser.info/json';
@@ -47,61 +47,53 @@ const elements = {
 async function init() {
     setupEventListeners();
     await detectLocation();
-    
+
     if (state.preferredGenres.length === 0) {
         showOnboarding();
     } else {
         fetchStations('topvote');
     }
-    
+
     setupVisualizer();
 }
 
 // --- API Logic ---
 
-async function fetchStations(type, query = '', params = {}) {
+async function fetchStations(type, query = '') {
     showLoader();
     let url = '';
-    
-    switch(type) {
-        case 'topvote':
-            // Personalized view based on preferred genres or location
-            let tag = 'trending';
-            if (state.preferredGenres.length > 0) {
-                // Pick a random preferred genre for variety each load
-                tag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
-            } else if (state.location?.country_code === 'IN') {
-                tag = 'malayalam';
-            }
-            url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
-            elements.sectionTitle.textContent = state.preferredGenres.length > 0 
-                ? `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}` 
-                : `Recommended for You`;
-            break;
-        case 'topclick':
-            url = `${API_BASE}/stations/topclick/20`;
-            elements.sectionTitle.textContent = 'Most Popular';
-            break;
-        case 'search':
-            url = `${API_BASE}/stations/search?name=${query}&limit=50&order=clickcount&reverse=true`;
-            elements.sectionTitle.textContent = `Results for "${query}"`;
-            break;
-        case 'tag':
-            url = `${API_BASE}/stations/bytag/${query}?limit=30&order=clickcount&reverse=true`;
-            elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
-            break;
-        case 'local':
-            const stateName = state.location?.region || 'Kerala';
-            const countryCode = state.location?.country_code || 'IN';
-            // Search primarily by Malayalam language to ensure Kerala stations
-            url = `${API_BASE}/stations/search?language=malayalam&order=clickcount&reverse=true&limit=60`;
-            elements.sectionTitle.textContent = `Malayalam Stations (Kerala)`;
-            break;
-        case 'islamic':
-            // Broader search to ensure results
-            url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
-            elements.sectionTitle.textContent = `Islamic & Peace Radio`;
-            break;
+
+    if (type === 'topvote') {
+        let tag = 'trending';
+        if (state.preferredGenres.length > 0) {
+            tag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
+        } else if (state.location && state.location.country_code === 'IN') {
+            tag = 'malayalam';
+        }
+        url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = state.preferredGenres.length > 0
+            ? `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}`
+            : 'Recommended for You';
+
+    } else if (type === 'topclick') {
+        url = `${API_BASE}/stations/topclick/20`;
+        elements.sectionTitle.textContent = 'Most Popular';
+
+    } else if (type === 'search') {
+        url = `${API_BASE}/stations/search?name=${query}&limit=50&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = `Results for "${query}"`;
+
+    } else if (type === 'tag') {
+        url = `${API_BASE}/stations/bytag/${query}?limit=30&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
+
+    } else if (type === 'local') {
+        url = `${API_BASE}/stations/search?language=malayalam&order=clickcount&reverse=true&limit=60`;
+        elements.sectionTitle.textContent = 'Malayalam Stations (Kerala)';
+
+    } else if (type === 'islamic') {
+        url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
+        elements.sectionTitle.textContent = 'Islamic & Peace Radio';
     }
 
     try {
@@ -119,8 +111,6 @@ async function fetchStations(type, query = '', params = {}) {
 
 async function detectLocation() {
     try {
-        // Using ipapi.co for quick location without user permission prompt for better UX initially
-        // but fallback to browser geolocation for precise results if needed.
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         state.location = data;
@@ -134,7 +124,7 @@ async function detectLocation() {
 
 function renderStations(stations) {
     elements.stationList.innerHTML = '';
-    
+
     if (stations.length === 0) {
         elements.stationList.innerHTML = '<p class="no-results">No stations found matching your criteria.</p>';
         return;
@@ -143,10 +133,10 @@ function renderStations(stations) {
     stations.forEach(station => {
         const card = document.createElement('div');
         card.className = 'station-card glass';
-        
+
         const artwork = station.favicon || '';
-        const artworkHtml = artwork 
-            ? `<img src="${artwork}" onerror="this.src='https://via.placeholder.com/200/8b5cf6/ffffff?text=${encodeURIComponent(station.name[0])}'" alt="${station.name}">`
+        const artworkHtml = artwork
+            ? `<img src="${artwork}" onerror="this.style.display='none'" alt="${station.name}">`
             : `<i data-lucide="radio"></i>`;
 
         card.innerHTML = `
@@ -166,7 +156,6 @@ function renderStations(stations) {
         elements.stationList.appendChild(card);
     });
 
-    // Re-init icons for newly added elements
     if (window.lucide) lucide.createIcons();
 }
 
@@ -188,20 +177,19 @@ function playStation(station) {
     elements.currentStationGenre.textContent = station.tags.split(',').slice(0, 3).join(' • ') || 'Live Stream';
 
     const streamUrl = station.url_resolved || station.url;
-    
+
     if (streamUrl.includes('.m3u8')) {
         if (Hls.isSupported()) {
             hls = new Hls();
             hls.loadSource(streamUrl);
             hls.attachMedia(elements.audioPlayer);
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 startPlayback();
             });
             hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) alert("This HLS stream failed to load.");
+                if (data.fatal) alert('This HLS stream failed to load.');
             });
         } else if (elements.audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari native HLS
             elements.audioPlayer.src = streamUrl;
             startPlayback();
         } else {
@@ -221,8 +209,8 @@ function startPlayback() {
             elements.togglePlay.disabled = false;
         })
         .catch(err => {
-            console.error("Playback failed:", err);
-            alert("This stream is currently unavailable. Try another station.");
+            console.error('Playback failed:', err);
+            alert('This stream is currently unavailable. Try another station.');
         });
 }
 
@@ -286,19 +274,17 @@ function setupEventListeners() {
 
     // Player Controls
     elements.togglePlay.onclick = togglePlay;
+
     elements.volumeSlider.oninput = (e) => {
-        const vol = e.target.value;
-        updateVolume(vol);
+        updateVolume(parseFloat(e.target.value));
     };
 
     elements.volUp.onclick = () => {
-        const newVol = Math.min(1, state.volume + 0.1);
-        updateVolume(newVol);
+        updateVolume(Math.min(1, state.volume + 0.1));
     };
 
     elements.volDown.onclick = () => {
-        const newVol = Math.max(0, state.volume - 0.1);
-        updateVolume(newVol);
+        updateVolume(Math.max(0, state.volume - 0.1));
     };
 
     // Station Skipping
@@ -322,7 +308,6 @@ function setupEventListeners() {
         chip.onclick = () => {
             elements.genreChips.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            
             const tag = chip.getAttribute('data-tag');
             if (tag === 'trending') {
                 fetchStations('topvote');
@@ -331,6 +316,7 @@ function setupEventListeners() {
             } else {
                 fetchStations('tag', tag);
             }
+        };
     });
 
     // Onboarding Listeners
@@ -340,7 +326,7 @@ function setupEventListeners() {
             const selectedCount = document.querySelectorAll('.onboarding-genre.selected').length;
             elements.finishOnboarding.disabled = selectedCount < 3;
             if (selectedCount >= 3) {
-                elements.finishOnboarding.textContent = `Ready to Rock!`;
+                elements.finishOnboarding.textContent = 'Ready to Rock!';
             } else {
                 elements.finishOnboarding.textContent = `Pick ${3 - selectedCount} more`;
             }
@@ -361,11 +347,9 @@ function showOnboarding() {
     elements.onboardingModal.classList.remove('hidden');
 }
 
-// --- Visualizer Logic --- (Simplified/Removed for maximum compatibility)
+// --- Visualizer Logic ---
 function setupVisualizer() {
-    // We'll keep the function signature to avoid errors, but skip the MediaElementSource 
-    // connection which causes silent audio on cross-origin streams.
-    console.log("Visualizer disabled for stream compatibility.");
+    console.log('Visualizer disabled for stream compatibility.');
 }
 
 // Start the app
