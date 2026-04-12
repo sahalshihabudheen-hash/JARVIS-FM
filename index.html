@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Radio | Explore the Airwaves</title>
+    <meta name="description" content="Listen to unlimited global radio stations for free. Discover local and international frequencies with Cosmic Radio.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Hls.js for HLS streams -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="dark-theme">
+    <div id="app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass">
+            <div class="logo">
+                <i data-lucide="radio" class="logo-icon"></i>
+                <span>Cosmic Radio</span>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-item active" data-type="topvote">
+                    <i data-lucide="trending-up"></i> Trending
+                </button>
+                <button class="nav-item" data-type="local">
+                    <i data-lucide="map-pin"></i> Nearby Stations
+                </button>
+                <button class="nav-item" data-type="topclick">
+                    <i data-lucide="star"></i> Popular
+                </button>
+                <button class="nav-item" data-type="islamic">
+                    <i data-lucide="moon"></i> Islamic Radio
+                </button>
+            </nav>
+            <div class="sidebar-divider"></div>
+            <div class="categories" id="categories-list">
+                <span class="category-label">Genres</span>
+                <button class="genre-item" data-tag="jazz">Jazz</button>
+                <button class="genre-item" data-tag="rock">Rock</button>
+                <button class="genre-item" data-tag="pop">Pop</button>
+                <button class="genre-item" data-tag="lofi">Lofi</button>
+                <button class="genre-item" data-tag="classical">Classical</button>
+                <button class="genre-item" data-tag="electronic">Electronic</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <header class="top-bar">
+                <div class="search-container glass">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="station-search" placeholder="Search stations, genres or countries...">
+                </div>
+                <div class="location-status glass" id="location-indicator">
+                    <i data-lucide="globe"></i>
+                    <span id="location-text">Detecting Location...</span>
+                </div>
+            </header>
+
+            <div class="genre-chips-container" id="genre-chips">
+                <button class="chip active" data-tag="trending">All</button>
+                <button class="chip" data-tag="malayalam">Malayalam</button>
+                <button class="chip" data-tag="islamic">Islamic</button>
+                <button class="chip" data-tag="news">News</button>
+                <button class="chip" data-tag="pop">Pop</button>
+                <button class="chip" data-tag="relax">Relax</button>
+            </div>
+
+            <section class="station-grid-container">
+                <h2 id="section-title">Trending Stations</h2>
+                <div class="station-grid" id="station-list">
+                    <!-- Stations will be injected here -->
+                    <div class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Fixed Player Bar -->
+        <footer class="player-bar glass">
+            <div class="now-playing">
+                <div class="station-artwork glass" id="current-artwork">
+                    <i data-lucide="music"></i>
+                </div>
+                <div class="station-info">
+                    <h4 id="current-station-name">Nothing Playing</h4>
+                    <p id="current-station-genre">Select a station to start</p>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <button id="toggle-play" class="play-btn glass" disabled>
+                    <i data-lucide="play" id="play-icon"></i>
+                </button>
+                <div class="volume-container">
+                    <i data-lucide="volume-2" class="volume-icon"></i>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
+                </div>
+            </div>
+
+            <div class="visualizer-container">
+                <canvas id="visualizer"></canvas>
+            </div>
+            
+            <audio id="audio-player" style="display:none"></audio>
+        </footer>
+    </div>
+    <script type="module" src="./main.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
