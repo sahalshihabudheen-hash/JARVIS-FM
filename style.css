@@ -288,7 +288,38 @@ h2 {
 .station-grid-container {
     display: flex;
     flex-direction: column;
+    gap: 40px;
+}
+
+.grid-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.section-divider {
+    display: flex;
+    align-items: center;
     gap: 20px;
+    margin-bottom: 10px;
+}
+
+.divider-info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.divider-info p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--card-border), transparent);
 }
 
 h2 {

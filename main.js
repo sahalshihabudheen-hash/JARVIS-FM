@@ -317,11 +317,40 @@ function renderStations(stations) {
         return;
     }
 
+    // Split stations into Live and Others (using lastcheckok as a proxy for real-time availability)
+    const liveStations = stations.filter(s => s.lastcheckok === 1).slice(0, 12);
+    const otherStations = stations.filter(s => s.lastcheckok !== 1 || !liveStations.includes(s));
+
+    if (liveStations.length > 0) {
+        renderSection('Live Now', 'Stations with a verified active signal', liveStations);
+    }
+
+    if (otherStations.length > 0) {
+        renderSection('All Frequencies', 'Explore the rest of the signals', otherStations);
+    }
+}
+
+function renderSection(title, subtitle, stations) {
+    const section = document.createElement('div');
+    section.className = 'grid-section';
+    section.innerHTML = `
+        <div class="section-divider">
+            <div class="divider-info">
+                <h3>${title}</h3>
+                <p>${subtitle}</p>
+            </div>
+            <div class="divider-line"></div>
+        </div>
+        <div class="station-grid section-grid-inner"></div>
+    `;
+    
+    const grid = section.querySelector('.section-grid-inner');
+    
     stations.forEach((station, index) => {
         const card = document.createElement('div');
         
-        // Randomly assign varied layout classes for a "human" feel
-        const isFeatured = index === 0 && stations.length > 5;
+        // Featured only for the first item in the Live section
+        const isFeatured = title === 'Live Now' && index === 0;
         card.className = `station-card glass ${isFeatured ? 'card-featured' : ''}`;
 
         const artwork = station.favicon || '';
@@ -331,10 +360,10 @@ function renderStations(stations) {
 
         // Add contextual badges
         let badgeHtml = '';
-        if (index < 3 && state.activeType === 'topvote') {
-            badgeHtml = `<div class="card-badge badge-popular"><i data-lucide="trending-up" style="width:10px;height:10px"></i> Popular</div>`;
-        } else if (Math.random() > 0.7) {
+        if (title === 'Live Now') {
             badgeHtml = `<div class="card-badge badge-live">Live</div>`;
+        } else if (index < 2 && state.activeType === 'topvote') {
+            badgeHtml = `<div class="card-badge badge-popular"><i data-lucide="trending-up" style="width:10px;height:10px"></i> Popular</div>`;
         }
 
         card.innerHTML = `
@@ -348,21 +377,21 @@ function renderStations(stations) {
             <div class="station-card-info">
                 <h5>${station.name}</h5>
                 <p>${station.tags.split(',').slice(0, 2).join(' • ') || 'Global Radio'}</p>
-                ${isFeatured ? '<span class="featured-label">Curated for you</span>' : ''}
+                ${isFeatured ? '<span class="featured-label">Top Recommended</span>' : ''}
             </div>
         `;
 
         card.onclick = () => playStation(station);
-        elements.stationList.appendChild(card);
+        grid.appendChild(card);
     });
+
+    elements.stationList.appendChild(section);
 
     if (window.lucide) {
         lucide.createIcons({
-            attrs: {
-                class: 'lucide-icon'
-            },
+            attrs: { class: 'lucide-icon' },
             nameAttr: 'data-lucide',
-            root: elements.stationList
+            root: grid
         });
     }
 }
