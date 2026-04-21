@@ -131,7 +131,7 @@ async function init() {
         showOnboarding();
     } else {
         // Fetch fresh data in the background
-        fetchStations('topvote');
+        fetchStations('home');
     }
 
     setupVisualizer();
@@ -151,20 +151,18 @@ async function fetchStations(type, query = '') {
     console.log(`Fetching stations: ${type} ${query}`);
     let url = '';
 
-    if (type === 'topvote') {
-        let tag = 'trending';
-        if (state.preferredGenres.length > 0) {
-            // Stability: Keep the same tag for the session unless explicitly changed
-            if (!state.activeTag || !state.preferredGenres.includes(state.activeTag)) {
-                state.activeTag = state.preferredGenres[Math.floor(Math.random() * state.preferredGenres.length)];
-            }
-            tag = state.activeTag;
-        } else if (state.location && state.location.country_code === 'IN') {
-            tag = 'malayalam';
-        }
-        url = `${API_BASE}/stations/search?tag=${tag}&limit=30&order=clickcount&reverse=true`;
-        elements.sectionTitle.textContent = `Picked for You: ${tag.charAt(0).toUpperCase() + tag.slice(1)}`;
-        elements.sectionSubtitle.textContent = 'Personalized selection based on your vibe';
+    if (type === 'home') {
+        const tag = state.preferredGenres.length > 0 
+            ? state.preferredGenres.join(',') 
+            : 'mixed';
+        url = `${API_BASE}/stations/search?tag=${tag}&tag_list=${tag}&order=clickcount&reverse=true&limit=60`;
+        elements.sectionTitle.textContent = 'For You';
+        elements.sectionSubtitle.textContent = `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`;
+
+    } else if (type === 'topvote') {
+        url = `${API_BASE}/stations/topvote/60`;
+        elements.sectionTitle.textContent = 'Trending Stations';
+        elements.sectionSubtitle.textContent = 'What everyone is listening to right now';
 
     } else if (type === 'topclick') {
         url = `${API_BASE}/stations/topclick/20`;
