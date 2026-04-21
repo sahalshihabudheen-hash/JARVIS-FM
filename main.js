@@ -190,7 +190,7 @@ async function fetchStations(type, query = '') {
 
     try {
         const response = await fetch(url, { 
-            signal: anySignal([signal, AbortSignal.timeout(12000)]) 
+            signal: anySignal([signal, timeoutSignal(15000)]) 
         });
         const data = await response.json();
         state.stations = data;
@@ -225,12 +225,20 @@ async function fetchStations(type, query = '') {
 function anySignal(signals) {
     const controller = new AbortController();
     for (const signal of signals) {
+        if (!signal || !signal.addEventListener) continue;
         if (signal.aborted) {
             controller.abort();
             return signal;
         }
         signal.addEventListener('abort', () => controller.abort(), { once: true });
     }
+    return controller.signal;
+}
+
+// Compatibility timeout signal
+function timeoutSignal(ms) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), ms);
     return controller.signal;
 }
 
@@ -246,7 +254,7 @@ async function detectLocation() {
     }
 
     try {
-        const response = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+        const response = await fetch('https://ipapi.co/json/', { signal: timeoutSignal(4000) });
         const data = await response.json();
         state.location = data;
         localStorage.setItem('userLocation', JSON.stringify(data));
