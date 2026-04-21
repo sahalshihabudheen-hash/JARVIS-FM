@@ -278,7 +278,7 @@ function renderStations(stations) {
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" onerror="this.src='https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=260&auto=format&fit=crop'; this.onerror=null;" alt="${station.name}">`
+            ? `<img src="${artwork}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=260&auto=format&fit=crop'; this.onerror=null;" alt="${station.name}">`
             : `<i data-lucide="radio"></i>`;
 
         // Add contextual badges
@@ -308,13 +308,28 @@ function renderStations(stations) {
         elements.stationList.appendChild(card);
     });
 
-    if (window.lucide) lucide.createIcons();
+    if (window.lucide) {
+        lucide.createIcons({
+            attrs: {
+                class: 'lucide-icon'
+            },
+            nameAttr: 'data-lucide',
+            root: elements.stationList
+        });
+    }
 }
 
 function showLoader() {
     // Only show the big loader if the grid is empty (first load)
-    if (elements.stationList.children.length === 0 || elements.stationList.querySelector('.no-results')) {
-        elements.stationList.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+    if (elements.stationList.children.length === 0 || elements.stationList.querySelector('.no-results') || elements.stationList.querySelector('.error')) {
+        elements.stationList.innerHTML = `
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        `;
     }
 }
 
@@ -345,10 +360,10 @@ function playStation(station) {
     const artwork = document.getElementById('player-artwork');
     if (artwork) {
         if (station.favicon) {
-            artwork.innerHTML = `<img src="${station.favicon}" onerror="this.parentElement.innerHTML='<i data-lucide=\\'radio\\'></i>'; lucide.createIcons();" alt="${station.name}">`;
+            artwork.innerHTML = `<img src="${station.favicon}" onerror="this.parentElement.innerHTML='<i data-lucide=\\'radio\\'></i>'; lucide.createIcons({ root: this.parentElement });" alt="${station.name}">`;
         } else {
             artwork.innerHTML = `<i data-lucide="radio"></i>`;
-            lucide.createIcons();
+            lucide.createIcons({ root: artwork });
         }
     }
 

@@ -9,11 +9,19 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CDNs Preconnect -->
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Hls.js for HLS streams -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <link rel="preload" href="./style.css" as="style">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body class="dark-theme">
@@ -66,10 +74,13 @@
                     <span class="section-subtitle" id="section-subtitle">Discover popular streams from around the globe</span>
                 </header>
                 <div class="station-grid" id="station-list">
-                    <!-- Stations will be injected here -->
-                    <div class="loader-container">
-                        <div class="loader"></div>
-                    </div>
+                    <!-- Skeleton Cards (visible while loading) -->
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
                 </div>
             </section>
         </main>
