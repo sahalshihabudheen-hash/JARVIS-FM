@@ -407,6 +407,10 @@ h2 {
     aspect-ratio: 1;
     border-radius: 12px;
     background: #12151b;
+    background-image: url('/logo.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -421,6 +425,14 @@ h2 {
     height: 100%;
     object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background: #12151b;
+}
+
+.station-card-artwork img.placeholder-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    opacity: 0.5;
 }
 
 .station-card:hover .station-card-artwork img {
