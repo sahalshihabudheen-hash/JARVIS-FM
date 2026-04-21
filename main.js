@@ -353,8 +353,8 @@ function renderSection(title, subtitle, stations) {
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=260&auto=format&fit=crop'; this.onerror=null;" alt="${station.name}">`
-            : `<i data-lucide="radio"></i>`;
+            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.png'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
+            : `<img src="/logo.png" class="placeholder-logo" alt="JARVIS FM">`;
 
         // Add contextual badges
         let badgeHtml = '';
