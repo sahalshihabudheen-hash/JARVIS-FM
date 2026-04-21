@@ -592,13 +592,17 @@ function setupEventListeners() {
         updateVolume(parseFloat(e.target.value));
     };
 
-    elements.volUp.onclick = () => {
-        updateVolume(Math.min(1, state.volume + 0.1));
-    };
+    if (elements.volUp) {
+        elements.volUp.onclick = () => {
+            updateVolume(Math.min(1, state.volume + 0.1));
+        };
+    }
 
-    elements.volDown.onclick = () => {
-        updateVolume(Math.max(0, state.volume - 0.1));
-    };
+    if (elements.volDown) {
+        elements.volDown.onclick = () => {
+            updateVolume(Math.max(0, state.volume - 0.1));
+        };
+    }
 
     // Station Skipping
     elements.nextBtn.onclick = () => {
