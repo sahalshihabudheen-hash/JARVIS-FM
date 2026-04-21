@@ -108,7 +108,8 @@ window.onerror = function(msg, url, lineNo, columnNo, error) {
 
 window.onunhandledrejection = function(event) {
     console.error('Unhandled Rejection:', event.reason);
-    showToast(`Network or logic error occurred.`, 'warning');
+    const errorMsg = event.reason?.message || event.reason || 'Network error';
+    showToast(`Error: ${errorMsg}`, 'warning');
 };
 
 // --- Initialization ---
