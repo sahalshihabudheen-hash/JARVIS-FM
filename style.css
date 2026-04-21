@@ -776,6 +776,25 @@ h2 {
     100% { transform: rotate(360deg); }
 }
 
+.error-container {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--card-border);
+}
+
+.error-container .error {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    max-width: 400px;
+}
+
 /* Skeleton Screens */
 .skeleton-card {
     height: 300px;

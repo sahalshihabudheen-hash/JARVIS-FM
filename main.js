@@ -2,7 +2,7 @@
  * JARVIS FM - Core Logic
  */
 
-const API_BASE = `https://all.api.radio-browser.info/json`;
+const API_BASE = `https://de1.api.radio-browser.info/json`;
 const USER_AGENT = 'JARVIS-FM/1.0';
 let activeFetchController = null;
 
@@ -190,10 +190,7 @@ async function fetchStations(type, query = '') {
 
     try {
         const response = await fetch(url, { 
-            headers: { 'User-Agent': USER_AGENT },
-            signal: signal,
-            // Combined signal for timeout
-            signal: anySignal([signal, AbortSignal.timeout(10000)]) 
+            signal: anySignal([signal, AbortSignal.timeout(12000)]) 
         });
         const data = await response.json();
         state.stations = data;
@@ -207,8 +204,15 @@ async function fetchStations(type, query = '') {
         if (error.name === 'AbortError') return; // Ignore intentional cancellations
         
         console.error('Error fetching stations:', error);
-        if (elements.stationList.children.length <= 1) {
-            elements.stationList.innerHTML = '<p class="error">The radio database is taking a bit too long to respond. Try again in a moment.</p>';
+        if (elements.stationList.querySelector('.skeleton-card')) {
+            elements.stationList.innerHTML = `
+                <div class="error-container">
+                    <i data-lucide="wifi-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:20px;"></i>
+                    <p class="error">The radio database is taking a bit too long to respond.</p>
+                    <button class="primary-btn" onclick="location.reload()" style="margin-top:20px;">Try Again</button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons({ root: elements.stationList });
         }
     } finally {
         if (activeFetchController && activeFetchController.signal === signal) {
