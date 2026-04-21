@@ -201,52 +201,53 @@ async function fetchStations(type, query = '') {
         elements.sectionSubtitle.textContent = 'Bringing the local community direct to your ears';
     }
 
-    const mirrors = [API_BASE, 'https://at1.api.radio-browser.info/json', 'https://all.api.radio-browser.info/json'];
-    let lastError = null;
+    try {
+        const mirrors = [API_BASE, 'https://at1.api.radio-browser.info/json', 'https://all.api.radio-browser.info/json'];
+        let lastError = null;
 
-    for (const mirror of mirrors) {
-        const fetchUrl = url.replace(API_BASE, mirror);
-        console.log(`Trying mirror: ${mirror}`);
-        
-        try {
-            const response = await fetch(fetchUrl, { 
-                signal: anySignal([signal, timeoutSignal(10000)]) 
-            });
+        for (const mirror of mirrors) {
+            const fetchUrl = url.replace(API_BASE, mirror);
+            console.log(`Trying mirror: ${mirror}`);
             
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const data = await response.json();
-            state.stations = data;
-            
-            if (type === 'topvote' || type === 'topclick') {
-                localStorage.setItem('cachedStations', JSON.stringify(data));
+            try {
+                const response = await fetch(fetchUrl, { 
+                    signal: anySignal([signal, timeoutSignal(10000)]) 
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                state.stations = data;
+                
+                if (type === 'topvote' || type === 'topclick') {
+                    localStorage.setItem('cachedStations', JSON.stringify(data));
+                }
+                
+                renderStations(data);
+                return; // Success, exit the loop
+            } catch (error) {
+                if (error.name === 'AbortError' && signal.aborted) return; 
+                console.warn(`Mirror ${mirror} failed:`, error.message);
+                lastError = error;
             }
-            
-            renderStations(data);
-            return; // Success, exit the loop
-        } catch (error) {
-            if (error.name === 'AbortError' && signal.aborted) return; 
-            console.warn(`Mirror ${mirror} failed:`, error.message);
-            lastError = error;
+        }
+
+        // If we reach here, all mirrors failed
+        if (elements.stationList.querySelector('.skeleton-card')) {
+            elements.stationList.innerHTML = `
+                <div class="error-container">
+                    <i data-lucide="wifi-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:20px;"></i>
+                    <p class="error">All radio database mirrors are currently unreachable. Please check your connection.</p>
+                    <button class="primary-btn" onclick="location.reload()" style="margin-top:20px;">Retry Now</button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons({ root: elements.stationList });
+        }
+    } finally {
+        if (activeFetchController && activeFetchController.signal === signal) {
+            activeFetchController = null;
         }
     }
-
-    // If we reach here, all mirrors failed
-    if (elements.stationList.querySelector('.skeleton-card')) {
-        elements.stationList.innerHTML = `
-            <div class="error-container">
-                <i data-lucide="wifi-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:20px;"></i>
-                <p class="error">All radio database mirrors are currently unreachable. Please check your connection.</p>
-                <button class="primary-btn" onclick="location.reload()" style="margin-top:20px;">Retry Now</button>
-            </div>
-        `;
-        if (window.lucide) lucide.createIcons({ root: elements.stationList });
-    }
-} finally {
-    if (activeFetchController && activeFetchController.signal === signal) {
-        activeFetchController = null;
-    }
-}
 }
 
 // Utility to combine abort signals
