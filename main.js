@@ -99,6 +99,18 @@ const elements = {
     expVolume: document.getElementById('exp-volume-slider')
 };
 
+// --- Error Handling ---
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    console.error('Global Error:', msg, 'at', url, ':', lineNo);
+    showToast(`App Error: ${msg}`, 'error');
+    return false;
+};
+
+window.onunhandledrejection = function(event) {
+    console.error('Unhandled Rejection:', event.reason);
+    showToast(`Network or logic error occurred.`, 'warning');
+};
+
 // --- Initialization ---
 
 async function init() {
@@ -135,6 +147,7 @@ async function fetchStations(type, query = '') {
     const signal = activeFetchController.signal;
 
     showLoader();
+    console.log(`Fetching stations: ${type} ${query}`);
     let url = '';
 
     if (type === 'topvote') {
@@ -188,37 +201,52 @@ async function fetchStations(type, query = '') {
         elements.sectionSubtitle.textContent = 'Bringing the local community direct to your ears';
     }
 
-    try {
-        const response = await fetch(url, { 
-            signal: anySignal([signal, timeoutSignal(15000)]) 
-        });
-        const data = await response.json();
-        state.stations = data;
+    const mirrors = [API_BASE, 'https://at1.api.radio-browser.info/json', 'https://all.api.radio-browser.info/json'];
+    let lastError = null;
+
+    for (const mirror of mirrors) {
+        const fetchUrl = url.replace(API_BASE, mirror);
+        console.log(`Trying mirror: ${mirror}`);
         
-        if (type === 'topvote' || type === 'topclick') {
-            localStorage.setItem('cachedStations', JSON.stringify(data));
-        }
-        
-        renderStations(data);
-    } catch (error) {
-        if (error.name === 'AbortError') return; // Ignore intentional cancellations
-        
-        console.error('Error fetching stations:', error);
-        if (elements.stationList.querySelector('.skeleton-card')) {
-            elements.stationList.innerHTML = `
-                <div class="error-container">
-                    <i data-lucide="wifi-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:20px;"></i>
-                    <p class="error">The radio database is taking a bit too long to respond.</p>
-                    <button class="primary-btn" onclick="location.reload()" style="margin-top:20px;">Try Again</button>
-                </div>
-            `;
-            if (window.lucide) lucide.createIcons({ root: elements.stationList });
-        }
-    } finally {
-        if (activeFetchController && activeFetchController.signal === signal) {
-            activeFetchController = null;
+        try {
+            const response = await fetch(fetchUrl, { 
+                signal: anySignal([signal, timeoutSignal(10000)]) 
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            state.stations = data;
+            
+            if (type === 'topvote' || type === 'topclick') {
+                localStorage.setItem('cachedStations', JSON.stringify(data));
+            }
+            
+            renderStations(data);
+            return; // Success, exit the loop
+        } catch (error) {
+            if (error.name === 'AbortError' && signal.aborted) return; 
+            console.warn(`Mirror ${mirror} failed:`, error.message);
+            lastError = error;
         }
     }
+
+    // If we reach here, all mirrors failed
+    if (elements.stationList.querySelector('.skeleton-card')) {
+        elements.stationList.innerHTML = `
+            <div class="error-container">
+                <i data-lucide="wifi-off" style="width:48px;height:48px;color:var(--text-muted);margin-bottom:20px;"></i>
+                <p class="error">All radio database mirrors are currently unreachable. Please check your connection.</p>
+                <button class="primary-btn" onclick="location.reload()" style="margin-top:20px;">Retry Now</button>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons({ root: elements.stationList });
+    }
+} finally {
+    if (activeFetchController && activeFetchController.signal === signal) {
+        activeFetchController = null;
+    }
+}
 }
 
 // Utility to combine abort signals
@@ -245,21 +273,27 @@ function timeoutSignal(ms) {
 // --- Location Logic ---
 
 async function detectLocation() {
+    console.log('Detecting location...');
     // Check cache first
     const cachedLoc = localStorage.getItem('userLocation');
     if (cachedLoc) {
-        const data = JSON.parse(cachedLoc);
-        state.location = data;
-        elements.locationText.textContent = `${data.city}, ${data.country_name}`;
+        try {
+            const data = JSON.parse(cachedLoc);
+            state.location = data;
+            elements.locationText.textContent = `${data.city}, ${data.country_name}`;
+        } catch(e) {}
     }
 
     try {
-        const response = await fetch('https://ipapi.co/json/', { signal: timeoutSignal(4000) });
+        const response = await fetch('https://ipapi.co/json/', { signal: timeoutSignal(5000) });
+        if (!response.ok) throw new Error('Location API failed');
         const data = await response.json();
         state.location = data;
         localStorage.setItem('userLocation', JSON.stringify(data));
         elements.locationText.textContent = `${data.city}, ${data.country_name}`;
+        console.log('Location detected:', data.country_code);
     } catch (e) {
+        console.warn('Location detection failed, using Global Mode');
         if (!state.location) elements.locationText.textContent = 'Global Mode';
     }
 }
