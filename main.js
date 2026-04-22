@@ -349,9 +349,7 @@ function renderSection(title, subtitle, stations) {
     stations.forEach((station, index) => {
         const card = document.createElement('div');
         
-        // Featured only for the first item in the Live section
-        const isFeatured = title === 'Live Now' && index === 0;
-        card.className = `station-card glass ${isFeatured ? 'card-featured' : ''}`;
+        card.className = 'station-card glass';
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
@@ -377,7 +375,6 @@ function renderSection(title, subtitle, stations) {
             <div class="station-card-info">
                 <h5>${station.name}</h5>
                 <p>${station.tags.split(',').slice(0, 2).join(' • ') || 'Global Radio'}</p>
-                ${isFeatured ? '<span class="featured-label">Top Recommended</span>' : ''}
             </div>
         `;
 

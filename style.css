@@ -459,21 +459,6 @@ h2 {
     align-items: start;
 }
 
-/* Natural Card Variance */
-.station-card.card-featured {
-    grid-column: span 2;
-    grid-row: span 1;
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: center;
-}
-
-.station-card.card-featured .station-card-artwork {
-    width: 140px;
-    margin-bottom: 0;
-}
-
 /* Station Card Styling */
 .station-card {
     padding: 20px;
