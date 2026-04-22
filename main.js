@@ -415,6 +415,10 @@ function renderRecommendations(stations) {
                 <h3>Top Recommendations</h3>
                 <p>Curated signals based on your vibe</p>
             </div>
+            <div class="carousel-nav">
+                <button class="nav-btn prev-btn"><i data-lucide="chevron-left"></i></button>
+                <button class="nav-btn next-btn"><i data-lucide="chevron-right"></i></button>
+            </div>
             <div class="divider-line"></div>
         </div>
         <div class="recommendations-scroll">
@@ -423,6 +427,7 @@ function renderRecommendations(stations) {
     `;
     
     const inner = container.querySelector('.recommendations-inner');
+    const scrollContainer = container.querySelector('.recommendations-scroll');
     
     stations.forEach((station, index) => {
         const item = document.createElement('div');
@@ -447,6 +452,14 @@ function renderRecommendations(stations) {
         item.onclick = () => playStation(station);
         inner.appendChild(item);
     });
+
+    // Navigation Logic
+    container.querySelector('.prev-btn').onclick = () => {
+        scrollContainer.scrollBy({ left: -340, behavior: 'smooth' });
+    };
+    container.querySelector('.next-btn').onclick = () => {
+        scrollContainer.scrollBy({ left: 340, behavior: 'smooth' });
+    };
 
     elements.stationList.prepend(container);
 

@@ -293,6 +293,37 @@ h2 {
     margin-bottom: 30px;
 }
 
+.carousel-nav {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.nav-btn:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.nav-btn i {
+    width: 20px;
+    height: 20px;
+}
+
 .recommendations-scroll {
     overflow-x: auto;
     padding-bottom: 15px;
