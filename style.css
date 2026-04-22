@@ -1776,3 +1776,27 @@ h2 {
     object-fit: contain;
     opacity: 0.8;
 }
+
+/* Explorer Notice */
+.explorer-notice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    background: var(--accent-soft);
+    border-radius: 12px;
+    color: var(--accent);
+    border-left: 4px solid var(--accent);
+}
+
+.explorer-notice p {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.explorer-controls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}

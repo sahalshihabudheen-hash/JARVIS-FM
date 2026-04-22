@@ -61,7 +61,6 @@ const elements = {
     stationList: document.getElementById('station-list'),
     stationSearch: document.getElementById('station-search'),
     locationText: document.getElementById('locationText'),
-    genrePicker: document.getElementById('genrePicker'),
     togglePlay: document.getElementById('toggle-play'),
     playIcon: document.getElementById('play-icon'),
     audioPlayer: document.getElementById('audio-player'),
@@ -161,9 +160,6 @@ async function fetchStations(type, query = '') {
         elements.sectionSubtitle.textContent = state.preferredGenres.length > 0 
             ? `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`
             : 'Explore trending global hits curated for you';
-        
-        elements.genrePicker.style.display = 'block';
-        renderGenrePicker();
 
     } else if (type === 'topvote') {
         url = `${API_BASE}/stations/topvote/60`;
@@ -334,14 +330,9 @@ function renderStations(stations) {
                 <div class="no-results glass">
                     <i data-lucide="search-x"></i>
                     <h3>No stations found in this region</h3>
-                    <p>Try scanning another popular state instead:</p>
-                    <div class="region-explorer">
-                        <button class="region-chip" onclick="searchByTag('Kerala')">Kerala</button>
-                        <button class="region-chip" onclick="searchByTag('Tamil Nadu')">Tamil Nadu</button>
-                        <button class="region-chip" onclick="searchByTag('Maharashtra')">Maharashtra</button>
-                        <button class="region-chip" onclick="searchByTag('Delhi')">Delhi</button>
-                        <button class="region-chip" onclick="searchByTag('Karnataka')">Karnataka</button>
-                    </div>
+                    <p>Try scanning another popular area. Enter a country code (e.g., US, GB, IN):</p>
+                    <input type="text" id="manual-region-input" placeholder="e.g. IN" class="glass-input">
+                    <button class="primary-btn" onclick="fetchStations('local', document.getElementById('manual-region-input').value)">Scan</button>
                 </div>
             `;
         } else {
@@ -371,6 +362,11 @@ function renderStations(stations) {
         renderSection('All Frequencies', 'Explore the rest of the signals', otherStations);
     }
 }
+
+window.searchByTag = function(tag) {
+    state.activeType = 'tag';
+    fetchStations('tag', tag);
+};
 
 function renderSection(title, subtitle, stations, targetContainer = null) {
     const section = document.createElement('div');
@@ -510,7 +506,6 @@ function renderTuner() {
 }
 
 function showLoader() {
-    elements.genrePicker.style.display = 'none';
     elements.stationList.innerHTML = `
         <div class="station-grid">
             <div class="skeleton-card"></div>
@@ -532,11 +527,10 @@ function renderRecommendations(stations) {
                 <h3>Top Recommendations</h3>
                 <p>Curated signals based on your vibe</p>
             </div>
-            <div class="divider-line"></div>
-            <div class="carousel-nav">
+            <section class="station-grid-container">
                 <button class="nav-btn prev-btn"><i data-lucide="chevron-left"></i></button>
                 <button class="nav-btn next-btn"><i data-lucide="chevron-right"></i></button>
-            </div>
+            </section>
         </div>
         <div class="recommendations-scroll">
             <div class="recommendations-inner"></div>
@@ -882,30 +876,28 @@ function renderLocationExplorer(currentCountry) {
     const explorer = document.createElement('div');
     explorer.className = 'location-explorer-bar glass';
     explorer.innerHTML = `
-        <div class="explorer-field">
-            <label>Country</label>
-            <select id="countrySelect">
-                <option value="IN" ${currentCountry === 'IN' ? 'selected' : ''}>India</option>
-                <option value="US" ${currentCountry === 'US' ? 'selected' : ''}>USA</option>
-                <option value="GB" ${currentCountry === 'GB' ? 'selected' : ''}>UK</option>
-                <option value="AE" ${currentCountry === 'AE' ? 'selected' : ''}>UAE</option>
-                <option value="PK" ${currentCountry === 'PK' ? 'selected' : ''}>Pakistan</option>
-                <option value="SA" ${currentCountry === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
-            </select>
+        <div class="explorer-notice">
+            <i data-lucide="info"></i>
+            <p>Location detection might not be exact. Feel free to manually change your region below!</p>
         </div>
-        <div class="explorer-field">
-            <label>Manual Location Scan</label>
-            <div class="search-input-group">
-                <input type="text" id="manualLocationInput" placeholder="Enter City or State (e.g. Dubai, Kerala)">
-                <button class="primary-btn" id="manualLocationBtn"><i data-lucide="search"></i></button>
+        <div class="explorer-controls">
+            <div class="explorer-field">
+                <label>Country</label>
+                <select id="countrySelect">
+                    <option value="IN" ${currentCountry === 'IN' ? 'selected' : ''}>India</option>
+                    <option value="US" ${currentCountry === 'US' ? 'selected' : ''}>USA</option>
+                    <option value="GB" ${currentCountry === 'GB' ? 'selected' : ''}>UK</option>
+                    <option value="AE" ${currentCountry === 'AE' ? 'selected' : ''}>UAE</option>
+                    <option value="PK" ${currentCountry === 'PK' ? 'selected' : ''}>Pakistan</option>
+                    <option value="SA" ${currentCountry === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
+                </select>
             </div>
-        </div>
-        <div class="explorer-field">
-            <label>Quick State Scan</label>
-            <div class="mini-region-explorer">
-                <button onclick="searchByTag('Kerala')">Kerala</button>
-                <button onclick="searchByTag('Delhi')">Delhi</button>
-                <button onclick="searchByTag('Maharashtra')">Maharashtra</button>
+            <div class="explorer-field">
+                <label>Manual Scan</label>
+                <div class="search-input-group">
+                    <input type="text" id="manualLocationInput" placeholder="Enter City or State...">
+                    <button class="primary-btn" id="manualLocationBtn"><i data-lucide="search"></i></button>
+                </div>
             </div>
         </div>
     `;
@@ -931,21 +923,6 @@ function renderLocationExplorer(currentCountry) {
     if (window.lucide) lucide.createIcons({ root: explorer });
 }
 
-// Keep existing searchByTag function or update it
-function searchByTag(tag) {
+window.searchByTag = function(tag) {
     fetchStations('tag', tag);
-}
-
-function renderGenrePicker() {
-    const genres = ['Malayalam', 'Pop', 'Rock', 'Jazz', 'News', 'Islamic', 'Classical', 'Hip-Hop', 'Electronic', 'Chillout'];
-    elements.genrePicker.innerHTML = `
-        <div class="genre-picker-bar glass">
-            <div class="explorer-field">
-                <label>Pick a Vibe</label>
-                <div class="genre-chips-container">
-                    ${genres.map(g => `<button class="genre-chip" onclick="searchByTag('${g}')">${g}</button>`).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
+};
