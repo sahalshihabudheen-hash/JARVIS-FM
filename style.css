@@ -116,8 +116,8 @@ body::before {
 }
 
 .logo-img {
-    width: 40px;
-    height: 40px;
+    width: 54px;
+    height: 54px;
     object-fit: cover;
     border-radius: 50%;
     border: 1px solid var(--accent-glow);
@@ -1779,8 +1779,8 @@ h2 {
 }
 
 .placeholder-logo {
-    width: 60px !important;
-    height: 60px !important;
+    width: 80px !important;
+    height: 80px !important;
     object-fit: cover;
     border-radius: 50%;
     opacity: 0.8;
