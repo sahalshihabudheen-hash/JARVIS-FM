@@ -393,8 +393,8 @@ function renderSection(title, subtitle, stations, targetContainer = null) {
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.png'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
-            : `<img src="/logo.png" class="placeholder-logo" alt="JARVIS FM">`;
+            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/LOGO.gif'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
+            : `<img src="/LOGO.gif" class="placeholder-logo" alt="JARVIS FM">`;
 
         let badgeHtml = '';
         if (station.lastcheckok === 1) {
@@ -548,7 +548,7 @@ function renderRecommendations(stations) {
         const item = document.createElement('div');
         item.className = 'recommendation-item glass';
         
-        const artwork = station.favicon || '/logo.png';
+        const artwork = station.favicon || '/LOGO.gif';
         const isPlaceholder = !station.favicon;
 
         item.innerHTML = `
