@@ -177,8 +177,9 @@ async function fetchStations(type, query = '') {
         elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
 
     } else if (type === 'local') {
-        url = `${API_BASE}/stations/search?language=malayalam&order=clickcount&reverse=true&limit=60`;
-        elements.sectionTitle.textContent = 'Malayalam Stations (Kerala)';
+        const locationTag = state.location ? (state.location.city || state.location.region || state.location.country_name) : 'India';
+        url = `${API_BASE}/stations/search?tag=${locationTag}&order=clickcount&reverse=true&limit=60`;
+        elements.sectionTitle.textContent = `Stations in ${locationTag}`;
 
     } else if (type === 'islamic') {
         url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
