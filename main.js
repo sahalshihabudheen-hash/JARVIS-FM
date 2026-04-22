@@ -160,6 +160,8 @@ async function fetchStations(type, query = '') {
         elements.sectionSubtitle.textContent = state.preferredGenres.length > 0 
             ? `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`
             : 'Explore trending global hits curated for you';
+        
+        renderGenrePicker();
 
     } else if (type === 'topvote') {
         url = `${API_BASE}/stations/topvote/60`;
@@ -390,8 +392,8 @@ function renderSection(title, subtitle, stations, targetContainer = null) {
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.png'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
-            : `<img src="/logo.png" class="placeholder-logo" alt="JARVIS FM">`;
+            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.gif'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
+            : `<img src="/logo.gif" class="placeholder-logo" alt="JARVIS FM">`;
 
         let badgeHtml = '';
         if (station.lastcheckok === 1) {
@@ -929,4 +931,19 @@ function renderLocationExplorer(currentCountry) {
 // Keep existing searchByTag function or update it
 function searchByTag(tag) {
     fetchStations('tag', tag);
+}
+
+function renderGenrePicker() {
+    const genres = ['Malayalam', 'Pop', 'Rock', 'Jazz', 'News', 'Islamic', 'Classical', 'Hip-Hop', 'Electronic', 'Chillout'];
+    const picker = document.createElement('div');
+    picker.className = 'genre-picker-bar glass';
+    picker.innerHTML = `
+        <div class="explorer-field">
+            <label>Pick a Vibe</label>
+            <div class="genre-chips-container">
+                ${genres.map(g => `<button class="genre-chip" onclick="searchByTag('${g}')">${g}</button>`).join('')}
+            </div>
+        </div>
+    `;
+    elements.stationList.prepend(picker);
 }
