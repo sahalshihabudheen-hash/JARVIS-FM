@@ -411,13 +411,13 @@ function renderRecommendations(stations) {
     container.className = 'recommendations-carousel-container';
     container.innerHTML = `
         <div class="section-divider">
-            <div class="divider-info">
-                <h3>Top Recommendations</h3>
-                <p>Curated signals based on your vibe</p>
-            </div>
             <div class="carousel-nav">
                 <button class="nav-btn prev-btn"><i data-lucide="chevron-left"></i></button>
                 <button class="nav-btn next-btn"><i data-lucide="chevron-right"></i></button>
+            </div>
+            <div class="divider-info">
+                <h3>Top Recommendations</h3>
+                <p>Curated signals based on your vibe</p>
             </div>
             <div class="divider-line"></div>
         </div>

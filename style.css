@@ -296,7 +296,7 @@ h2 {
 .carousel-nav {
     display: flex;
     gap: 10px;
-    margin-left: auto;
+    margin-right: 15px;
 }
 
 .nav-btn {
