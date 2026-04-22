@@ -118,12 +118,19 @@ body::before {
 .logo-img {
     width: 40px;
     height: 40px;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid var(--accent-glow);
 }
 
 .modal-logo {
     width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
     margin-bottom: 20px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .nav-links {
@@ -377,8 +384,9 @@ h2 {
 }
 
 .rec-artwork img.placeholder-logo {
-    padding: 25px;
-    object-fit: contain;
+    padding: 0;
+    object-fit: cover;
+    border-radius: 50%;
     opacity: 0.7;
 }
 
@@ -1773,7 +1781,8 @@ h2 {
 .placeholder-logo {
     width: 60px !important;
     height: 60px !important;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: 50%;
     opacity: 0.8;
 }
 
