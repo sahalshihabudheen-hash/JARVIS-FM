@@ -177,9 +177,14 @@ async function fetchStations(type, query = '') {
         elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
 
     } else if (type === 'local') {
-        const locationTag = state.location ? (state.location.city || state.location.region || state.location.country_name) : 'India';
-        url = `${API_BASE}/stations/search?tag=${locationTag}&order=clickcount&reverse=true&limit=60`;
-        elements.sectionTitle.textContent = `Stations in ${locationTag}`;
+        const country = state.location ? state.location.country_code : 'IN';
+        const region = state.location ? state.location.region : '';
+        const city = state.location ? state.location.city : '';
+        
+        // Search by country as primary, but title it by region/city for context
+        url = `${API_BASE}/stations/bycountrycodeexact/${country}?order=clickcount&reverse=true&limit=60`;
+        elements.sectionTitle.textContent = `Stations in ${region || country}`;
+        elements.sectionSubtitle.textContent = `Exploring signals from ${city || region || 'your region'}`;
 
     } else if (type === 'islamic') {
         url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
@@ -314,7 +319,22 @@ function renderStations(stations) {
     elements.stationList.innerHTML = '';
 
     if (stations.length === 0) {
-        elements.stationList.innerHTML = '<p class="no-results">No stations found matching your criteria.</p>';
+        elements.stationList.innerHTML = `
+            <div class="no-results glass">
+                <i data-lucide="search-x"></i>
+                <h3>No local stations found in ${state.location?.city || 'this area'}</h3>
+                <p>The signal is weak here! Try scanning one of these states instead:</p>
+                <div class="region-explorer">
+                    <button class="region-chip" onclick="searchByTag('Kerala')">Kerala</button>
+                    <button class="region-chip" onclick="searchByTag('Tamil Nadu')">Tamil Nadu</button>
+                    <button class="region-chip" onclick="searchByTag('Maharashtra')">Maharashtra</button>
+                    <button class="region-chip" onclick="searchByTag('Delhi')">Delhi</button>
+                    <button class="region-chip" onclick="searchByTag('Karnataka')">Karnataka</button>
+                    <button class="region-chip" onclick="searchByTag('Punjab')">Punjab</button>
+                </div>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
         return;
     }
 

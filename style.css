@@ -1439,3 +1439,63 @@ h2 {
     from { opacity: 1; transform: translateX(0)    scale(1);   }
     to   { opacity: 0; transform: translateX(60px) scale(0.9); }
 }
+
+/* No Results Explorer */
+.no-results {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    text-align: center;
+    gap: 15px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--card-border);
+    animation: fadeIn 0.5s var(--ease-out);
+}
+
+.no-results i {
+    width: 64px;
+    height: 64px;
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-bottom: 10px;
+}
+
+.no-results h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.no-results p {
+    color: var(--text-dim);
+}
+
+.region-explorer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.region-chip {
+    padding: 10px 24px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.region-chip:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-3px);
+}
