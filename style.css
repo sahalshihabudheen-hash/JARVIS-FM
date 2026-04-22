@@ -410,7 +410,7 @@ h2 {
     background-image: url('/logo.png');
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 40px;
+    background-size: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -429,10 +429,10 @@ h2 {
 }
 
 .station-card-artwork img.placeholder-logo {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     object-fit: contain;
-    opacity: 0.5;
+    opacity: 0.6;
 }
 
 .station-card:hover .station-card-artwork img {
