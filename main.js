@@ -61,6 +61,7 @@ const elements = {
     stationList: document.getElementById('station-list'),
     stationSearch: document.getElementById('station-search'),
     locationText: document.getElementById('locationText'),
+    locationExplorer: document.getElementById('locationExplorer'),
     togglePlay: document.getElementById('toggle-play'),
     playIcon: document.getElementById('play-icon'),
     audioPlayer: document.getElementById('audio-player'),
@@ -151,14 +152,16 @@ async function fetchStations(type, query = '') {
     console.log(`Fetching stations: ${type} ${query}`);
     let url = '';
 
+    if (type !== 'local') {
+        elements.locationExplorer.style.display = 'none';
+    }
+
     if (type === 'home') {
-        const tagList = state.preferredGenres.length > 0 
-            ? state.preferredGenres.join(',') 
-            : 'mixed';
-        url = `${API_BASE}/stations/search?tagList=${tagList}&tagExact=false&order=clickcount&reverse=true&limit=60`;
+        const primaryGenre = state.preferredGenres[0] || 'mixed';
+        url = `${API_BASE}/stations/search?tag=${primaryGenre}&order=clickcount&reverse=true&limit=60`;
         elements.sectionTitle.textContent = 'For You';
         elements.sectionSubtitle.textContent = state.preferredGenres.length > 0 
-            ? `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`
+            ? `Personalized selection based on your interest in ${state.preferredGenres.join(', ')}`
             : 'Explore trending global hits curated for you';
 
     } else if (type === 'topvote') {
@@ -506,6 +509,7 @@ function renderTuner() {
 }
 
 function showLoader() {
+    elements.locationExplorer.style.display = 'none';
     elements.stationList.innerHTML = `
         <div class="station-grid">
             <div class="skeleton-card"></div>
@@ -873,41 +877,41 @@ function setupVisualizer() {
 // Start the app
 init();
 function renderLocationExplorer(currentCountry) {
-    const explorer = document.createElement('div');
-    explorer.className = 'location-explorer-bar glass';
-    explorer.innerHTML = `
-        <div class="explorer-notice">
-            <i data-lucide="info"></i>
-            <p>Location detection might not be exact. Feel free to manually change your region below!</p>
-        </div>
-        <div class="explorer-controls">
-            <div class="explorer-field">
-                <label>Country</label>
-                <select id="countrySelect">
-                    <option value="IN" ${currentCountry === 'IN' ? 'selected' : ''}>India</option>
-                    <option value="US" ${currentCountry === 'US' ? 'selected' : ''}>USA</option>
-                    <option value="GB" ${currentCountry === 'GB' ? 'selected' : ''}>UK</option>
-                    <option value="AE" ${currentCountry === 'AE' ? 'selected' : ''}>UAE</option>
-                    <option value="PK" ${currentCountry === 'PK' ? 'selected' : ''}>Pakistan</option>
-                    <option value="SA" ${currentCountry === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
-                </select>
+    elements.locationExplorer.innerHTML = `
+        <div class="location-explorer-bar glass">
+            <div class="explorer-notice">
+                <i data-lucide="info"></i>
+                <p>Location detection might not be exact. Feel free to manually change your region below!</p>
             </div>
-            <div class="explorer-field">
-                <label>Manual Scan</label>
-                <div class="search-input-group">
-                    <input type="text" id="manualLocationInput" placeholder="Enter City or State...">
-                    <button class="primary-btn" id="manualLocationBtn"><i data-lucide="search"></i></button>
+            <div class="explorer-controls">
+                <div class="explorer-field">
+                    <label>Country</label>
+                    <select id="countrySelect">
+                        <option value="IN" ${currentCountry === 'IN' ? 'selected' : ''}>India</option>
+                        <option value="US" ${currentCountry === 'US' ? 'selected' : ''}>USA</option>
+                        <option value="GB" ${currentCountry === 'GB' ? 'selected' : ''}>UK</option>
+                        <option value="AE" ${currentCountry === 'AE' ? 'selected' : ''}>UAE</option>
+                        <option value="PK" ${currentCountry === 'PK' ? 'selected' : ''}>Pakistan</option>
+                        <option value="SA" ${currentCountry === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
+                    </select>
+                </div>
+                <div class="explorer-field">
+                    <label>Manual Scan</label>
+                    <div class="search-input-group">
+                        <input type="text" id="manualLocationInput" placeholder="Enter City or State...">
+                        <button class="primary-btn" id="manualLocationBtn"><i data-lucide="search"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 
-    explorer.querySelector('#countrySelect').onchange = (e) => {
+    elements.locationExplorer.querySelector('#countrySelect').onchange = (e) => {
         fetchStations('local', e.target.value);
     };
 
-    const manualInput = explorer.querySelector('#manualLocationInput');
-    const manualBtn = explorer.querySelector('#manualLocationBtn');
+    const manualInput = elements.locationExplorer.querySelector('#manualLocationInput');
+    const manualBtn = elements.locationExplorer.querySelector('#manualLocationBtn');
 
     const handleManualSearch = () => {
         const val = manualInput.value.trim();
@@ -919,8 +923,7 @@ function renderLocationExplorer(currentCountry) {
     manualBtn.onclick = handleManualSearch;
     manualInput.onkeypress = (e) => { if (e.key === 'Enter') handleManualSearch(); };
 
-    elements.stationList.prepend(explorer);
-    if (window.lucide) lucide.createIcons({ root: explorer });
+    if (window.lucide) lucide.createIcons({ root: elements.locationExplorer });
 }
 
 window.searchByTag = function(tag) {
