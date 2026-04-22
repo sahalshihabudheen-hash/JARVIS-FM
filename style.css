@@ -1629,3 +1629,70 @@ h2 {
 .filter-toggle input:checked + .toggle-slider::before {
     transform: translateX(20px);
 }
+
+/* Location Explorer Bar */
+.location-explorer-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 20px 30px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--card-border);
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.explorer-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.explorer-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+}
+
+.explorer-field select {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.explorer-field select:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent);
+}
+
+.mini-region-explorer {
+    display: flex;
+    gap: 10px;
+}
+
+.mini-region-explorer button {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.mini-region-explorer button:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}

@@ -157,7 +157,9 @@ async function fetchStations(type, query = '') {
             : 'mixed';
         url = `${API_BASE}/stations/search?tagList=${tagList}&tagExact=false&order=clickcount&reverse=true&limit=60`;
         elements.sectionTitle.textContent = 'For You';
-        elements.sectionSubtitle.textContent = `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`;
+        elements.sectionSubtitle.textContent = state.preferredGenres.length > 0 
+            ? `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`
+            : 'Explore trending global hits curated for you';
 
     } else if (type === 'topvote') {
         url = `${API_BASE}/stations/topvote/60`;
@@ -177,14 +179,14 @@ async function fetchStations(type, query = '') {
         elements.sectionTitle.textContent = `${query.toUpperCase()} Stations`;
 
     } else if (type === 'local') {
-        const country = state.location ? state.location.country_code : 'IN';
-        const region = state.location ? state.location.region : '';
-        const city = state.location ? state.location.city : '';
+        const country = query || (state.location ? state.location.country_code : 'IN');
+        const region = state.location?.region || '';
         
-        // Search by country as primary, but title it by region/city for context
         url = `${API_BASE}/stations/bycountrycodeexact/${country}?order=clickcount&reverse=true&limit=60`;
-        elements.sectionTitle.textContent = `Stations in ${region || country}`;
-        elements.sectionSubtitle.textContent = `Exploring signals from ${city || region || 'your region'}`;
+        elements.sectionTitle.textContent = `Nearby Stations`;
+        elements.sectionSubtitle.textContent = `Signals from ${country.toUpperCase()}`;
+        
+        renderLocationExplorer(country);
 
     } else if (type === 'islamic') {
         url = `${API_BASE}/stations/search?tag=islamic&limit=60&order=clickcount&reverse=true`;
@@ -323,21 +325,30 @@ function renderStations(stations) {
     elements.stationList.innerHTML = '';
 
     if (stations.length === 0) {
-        elements.stationList.innerHTML = `
-            <div class="no-results glass">
-                <i data-lucide="search-x"></i>
-                <h3>No local stations found in ${state.location?.city || 'this area'}</h3>
-                <p>The signal is weak here! Try scanning one of these states instead:</p>
-                <div class="region-explorer">
-                    <button class="region-chip" onclick="searchByTag('Kerala')">Kerala</button>
-                    <button class="region-chip" onclick="searchByTag('Tamil Nadu')">Tamil Nadu</button>
-                    <button class="region-chip" onclick="searchByTag('Maharashtra')">Maharashtra</button>
-                    <button class="region-chip" onclick="searchByTag('Delhi')">Delhi</button>
-                    <button class="region-chip" onclick="searchByTag('Karnataka')">Karnataka</button>
-                    <button class="region-chip" onclick="searchByTag('Punjab')">Punjab</button>
+        if (state.activeType === 'local') {
+            elements.stationList.innerHTML = `
+                <div class="no-results glass">
+                    <i data-lucide="search-x"></i>
+                    <h3>No stations found in this region</h3>
+                    <p>Try scanning another popular state instead:</p>
+                    <div class="region-explorer">
+                        <button class="region-chip" onclick="searchByTag('Kerala')">Kerala</button>
+                        <button class="region-chip" onclick="searchByTag('Tamil Nadu')">Tamil Nadu</button>
+                        <button class="region-chip" onclick="searchByTag('Maharashtra')">Maharashtra</button>
+                        <button class="region-chip" onclick="searchByTag('Delhi')">Delhi</button>
+                        <button class="region-chip" onclick="searchByTag('Karnataka')">Karnataka</button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            elements.stationList.innerHTML = `
+                <div class="no-results glass">
+                    <i data-lucide="search-x"></i>
+                    <h3>No results found</h3>
+                    <p>Try exploring a different genre or searching for another name.</p>
+                </div>
+            `;
+        }
         if (window.lucide) lucide.createIcons();
         return;
     }
@@ -862,3 +873,40 @@ function setupVisualizer() {
 
 // Start the app
 init();
+function renderLocationExplorer(currentCountry) {
+    const explorer = document.createElement('div');
+    explorer.className = 'location-explorer-bar glass';
+    explorer.innerHTML = `
+        <div class="explorer-field">
+            <label>Country</label>
+            <select id="countrySelect">
+                <option value="IN" ${currentCountry === 'IN' ? 'selected' : ''}>India</option>
+                <option value="US" ${currentCountry === 'US' ? 'selected' : ''}>USA</option>
+                <option value="GB" ${currentCountry === 'GB' ? 'selected' : ''}>UK</option>
+                <option value="AE" ${currentCountry === 'AE' ? 'selected' : ''}>UAE</option>
+                <option value="PK" ${currentCountry === 'PK' ? 'selected' : ''}>Pakistan</option>
+                <option value="SA" ${currentCountry === 'SA' ? 'selected' : ''}>Saudi Arabia</option>
+            </select>
+        </div>
+        <div class="explorer-field">
+            <label>Quick State Scan</label>
+            <div class="mini-region-explorer">
+                <button onclick="searchByTag('Kerala')">Kerala</button>
+                <button onclick="searchByTag('Delhi')">Delhi</button>
+                <button onclick="searchByTag('Maharashtra')">Maharashtra</button>
+                <button onclick="searchByTag('Karnataka')">Karnataka</button>
+            </div>
+        </div>
+    `;
+
+    explorer.querySelector('#countrySelect').onchange = (e) => {
+        fetchStations('local', e.target.value);
+    };
+
+    elements.stationList.prepend(explorer);
+}
+
+// Keep existing searchByTag function or update it
+function searchByTag(tag) {
+    fetchStations('tag', tag);
+}
