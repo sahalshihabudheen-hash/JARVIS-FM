@@ -320,9 +320,9 @@ function renderStations(stations) {
     const otherStations = stations.filter(s => s.lastcheckok !== 1 || !liveStations.includes(s));
 
     if (liveStations.length > 0) {
-        // Hero Section for the very first live station
-        renderHero(liveStations[0]);
-        renderSection('Live Now', 'Stations with a verified active signal', liveStations.slice(1));
+        // Recommendation Carousel for top 5 live stations
+        renderRecommendations(liveStations.slice(0, 5));
+        renderSection('Live Now', 'Stations with a verified active signal', liveStations.slice(5));
     }
 
     if (otherStations.length > 0) {
@@ -409,39 +409,52 @@ function showLoader() {
     `;
 }
 
-function renderHero(station) {
-    const hero = document.createElement('div');
-    hero.className = 'hero-section glass';
-    
-    const artwork = station.favicon || '/logo.png';
-    const isPlaceholder = !station.favicon;
-
-    hero.innerHTML = `
-        <div class="hero-content">
-            <div class="hero-label">
-                <span class="pulse-dot"></span> Recommended For You
+function renderRecommendations(stations) {
+    const container = document.createElement('div');
+    container.className = 'recommendations-carousel-container';
+    container.innerHTML = `
+        <div class="section-divider">
+            <div class="divider-info">
+                <h3>Top Recommendations</h3>
+                <p>Curated signals based on your vibe</p>
             </div>
-            <h1>${station.name}</h1>
-            <p>${station.tags.split(',').slice(0, 3).join(' • ') || 'Global Radio'}</p>
-            <div class="hero-actions">
-                <button class="primary-btn hero-play-btn">
-                    <i data-lucide="play"></i> Listen Now
-                </button>
-            </div>
+            <div class="divider-line"></div>
         </div>
-        <div class="hero-visual">
-            <div class="hero-visual-container">
-                <img src="${artwork}" class="${isPlaceholder ? 'placeholder-logo' : ''}" alt="${station.name}">
-            </div>
-            <div class="hero-glow"></div>
+        <div class="recommendations-scroll">
+            <div class="recommendations-inner"></div>
         </div>
     `;
+    
+    const inner = container.querySelector('.recommendations-inner');
+    
+    stations.forEach((station, index) => {
+        const item = document.createElement('div');
+        item.className = 'recommendation-item glass';
+        
+        const artwork = station.favicon || '/logo.png';
+        const isPlaceholder = !station.favicon;
 
-    hero.querySelector('.hero-play-btn').onclick = () => playStation(station);
-    elements.stationList.prepend(hero);
+        item.innerHTML = `
+            <div class="rec-artwork">
+                <img src="${artwork}" class="${isPlaceholder ? 'placeholder-logo' : ''}" alt="${station.name}">
+                <div class="rec-play-overlay">
+                    <i data-lucide="play"></i>
+                </div>
+            </div>
+            <div class="rec-info">
+                <h4>${station.name}</h4>
+                <p>${station.tags.split(',')[0] || 'Global'}</p>
+            </div>
+        `;
+
+        item.onclick = () => playStation(station);
+        inner.appendChild(item);
+    });
+
+    elements.stationList.prepend(container);
 
     if (window.lucide) {
-        lucide.createIcons({ root: hero });
+        lucide.createIcons({ root: container });
     }
 }
 
