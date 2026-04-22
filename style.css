@@ -553,10 +553,10 @@ h2 {
 }
 
 .station-card-artwork img.placeholder-logo {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    opacity: 0.6;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
 }
 
 .station-card:hover .station-card-artwork img {
@@ -1742,15 +1742,30 @@ h2 {
 }
 
 /* Genre Picker Bar */
+.genre-picker-container {
+    margin-bottom: 20px;
+}
+
 .genre-picker-bar {
-    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     gap: 15px;
     padding: 25px 30px;
-    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    margin-bottom: 30px;
+    border-radius: var(--radius-lg);
+}
+
+.genre-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.genre-picker-header h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .genre-chips-container {
@@ -1761,21 +1776,26 @@ h2 {
 
 .genre-chip {
     padding: 10px 20px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--card-border);
     border-radius: 30px;
-    color: var(--text-main);
+    color: var(--text-dim);
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition-base);
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
-.genre-chip:hover {
+.genre-chip:hover, .genre-chip.active {
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent);
     transform: translateY(-2px);
+}
+
+.genre-chip.active {
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .placeholder-logo {

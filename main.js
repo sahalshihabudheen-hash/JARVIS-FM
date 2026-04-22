@@ -97,7 +97,8 @@ const elements = {
     expTogglePlay: document.getElementById('exp-toggle-play'),
     expPrev: document.getElementById('exp-prev'),
     expNext: document.getElementById('exp-next'),
-    expVolume: document.getElementById('exp-volume-slider')
+    expVolume: document.getElementById('exp-volume-slider'),
+    genrePicker: document.getElementById('genrePicker')
 };
 
 // --- Error Handling ---
@@ -156,7 +157,12 @@ async function fetchStations(type, query = '') {
         elements.locationExplorer.style.display = 'none';
     }
 
+    if (type !== 'home' && type !== 'tag') {
+        elements.genrePicker.style.display = 'none';
+    }
+
     if (type === 'home') {
+        renderGenreHub();
         const primaryGenre = state.preferredGenres[0] || 'mixed';
         url = `${API_BASE}/stations/search?tag=${primaryGenre}&order=clickcount&reverse=true&limit=60`;
         elements.sectionTitle.textContent = 'For You';
@@ -926,6 +932,50 @@ function renderLocationExplorer(currentCountry) {
     if (window.lucide) lucide.createIcons({ root: elements.locationExplorer });
 }
 
+function renderGenreHub() {
+    const genres = [
+        { name: 'Pop', tag: 'pop' },
+        { name: 'Rock', tag: 'rock' },
+        { name: 'Jazz', tag: 'jazz' },
+        { name: 'EDM', tag: 'electronic' },
+        { name: 'Lofi', tag: 'lofi' },
+        { name: 'Hip Hop', tag: 'hiphop' },
+        { name: 'Classical', tag: 'classical' },
+        { name: 'Relax', tag: 'relax' },
+        { name: 'Islamic', tag: 'islamic' },
+        { name: 'Malayalam', tag: 'malayalam' },
+        { name: 'Bollywood', tag: 'bollywood' },
+        { name: '80s', tag: '80s' },
+        { name: '90s', tag: '90s' },
+        { name: 'News', tag: 'news' }
+    ];
+
+    elements.genrePicker.innerHTML = `
+        <div class="genre-picker-bar glass">
+            <div class="genre-picker-header">
+                <h3>Explore Genres</h3>
+            </div>
+            <div class="genre-chips-container">
+                ${genres.map(g => `<button class="genre-chip ${state.activeTag === g.tag ? 'active' : ''}" data-tag="${g.tag}">${g.name}</button>`).join('')}
+            </div>
+        </div>
+    `;
+
+    elements.genrePicker.style.display = 'block';
+
+    // Add listeners
+    elements.genrePicker.querySelectorAll('.genre-chip').forEach(chip => {
+        chip.onclick = () => {
+            const tag = chip.getAttribute('data-tag');
+            state.activeTag = tag;
+            state.activeType = 'tag';
+            fetchStations('tag', tag);
+        };
+    });
+}
+
 window.searchByTag = function(tag) {
+    state.activeType = 'tag';
+    state.activeTag = tag;
     fetchStations('tag', tag);
 };
