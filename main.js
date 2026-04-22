@@ -889,12 +889,18 @@ function renderLocationExplorer(currentCountry) {
             </select>
         </div>
         <div class="explorer-field">
+            <label>Manual Location Scan</label>
+            <div class="search-input-group">
+                <input type="text" id="manualLocationInput" placeholder="Enter City or State (e.g. Dubai, Kerala)">
+                <button class="primary-btn" id="manualLocationBtn"><i data-lucide="search"></i></button>
+            </div>
+        </div>
+        <div class="explorer-field">
             <label>Quick State Scan</label>
             <div class="mini-region-explorer">
                 <button onclick="searchByTag('Kerala')">Kerala</button>
                 <button onclick="searchByTag('Delhi')">Delhi</button>
                 <button onclick="searchByTag('Maharashtra')">Maharashtra</button>
-                <button onclick="searchByTag('Karnataka')">Karnataka</button>
             </div>
         </div>
     `;
@@ -903,7 +909,21 @@ function renderLocationExplorer(currentCountry) {
         fetchStations('local', e.target.value);
     };
 
+    const manualInput = explorer.querySelector('#manualLocationInput');
+    const manualBtn = explorer.querySelector('#manualLocationBtn');
+
+    const handleManualSearch = () => {
+        const val = manualInput.value.trim();
+        if (val) {
+            fetchStations('tag', val);
+        }
+    };
+
+    manualBtn.onclick = handleManualSearch;
+    manualInput.onkeypress = (e) => { if (e.key === 'Enter') handleManualSearch(); };
+
     elements.stationList.prepend(explorer);
+    if (window.lucide) lucide.createIcons({ root: explorer });
 }
 
 // Keep existing searchByTag function or update it

@@ -1696,3 +1696,39 @@ h2 {
     border-color: var(--accent);
     color: var(--accent);
 }
+
+/* Manual Location Search */
+.search-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input-group input {
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-main);
+    width: 240px;
+    outline: none;
+    transition: var(--transition-base);
+}
+
+.search-input-group input:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.1);
+}
+
+.search-input-group button {
+    padding: 10px;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-input-group button i {
+    width: 18px;
+    height: 18px;
+}
