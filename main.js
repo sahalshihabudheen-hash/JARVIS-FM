@@ -152,10 +152,10 @@ async function fetchStations(type, query = '') {
     let url = '';
 
     if (type === 'home') {
-        const tag = state.preferredGenres.length > 0 
+        const tagList = state.preferredGenres.length > 0 
             ? state.preferredGenres.join(',') 
             : 'mixed';
-        url = `${API_BASE}/stations/search?tag=${tag}&tag_list=${tag}&order=clickcount&reverse=true&limit=60`;
+        url = `${API_BASE}/stations/search?tagList=${tagList}&tagExact=false&order=clickcount&reverse=true&limit=60`;
         elements.sectionTitle.textContent = 'For You';
         elements.sectionSubtitle.textContent = `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`;
 
@@ -398,12 +398,14 @@ function showLoader() {
     // Only show the big loader if the grid is empty (first load)
     if (elements.stationList.children.length === 0 || elements.stationList.querySelector('.no-results') || elements.stationList.querySelector('.error')) {
         elements.stationList.innerHTML = `
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
+            <div class="station-grid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
         `;
     }
 }
