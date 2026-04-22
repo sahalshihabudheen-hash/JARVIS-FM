@@ -60,7 +60,8 @@ let state = {
 const elements = {
     stationList: document.getElementById('station-list'),
     stationSearch: document.getElementById('station-search'),
-    locationText: document.getElementById('location-text'),
+    locationText: document.getElementById('locationText'),
+    genrePicker: document.getElementById('genrePicker'),
     togglePlay: document.getElementById('toggle-play'),
     playIcon: document.getElementById('play-icon'),
     audioPlayer: document.getElementById('audio-player'),
@@ -161,6 +162,7 @@ async function fetchStations(type, query = '') {
             ? `Personalized stations based on your interest in ${state.preferredGenres.slice(0, 3).join(', ')}`
             : 'Explore trending global hits curated for you';
         
+        elements.genrePicker.style.display = 'block';
         renderGenrePicker();
 
     } else if (type === 'topvote') {
@@ -392,8 +394,8 @@ function renderSection(title, subtitle, stations, targetContainer = null) {
 
         const artwork = station.favicon || '';
         const artworkHtml = artwork
-            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.gif'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
-            : `<img src="/logo.gif" class="placeholder-logo" alt="JARVIS FM">`;
+            ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.png'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
+            : `<img src="/logo.png" class="placeholder-logo" alt="JARVIS FM">`;
 
         let badgeHtml = '';
         if (station.lastcheckok === 1) {
@@ -508,6 +510,7 @@ function renderTuner() {
 }
 
 function showLoader() {
+    elements.genrePicker.style.display = 'none';
     elements.stationList.innerHTML = `
         <div class="station-grid">
             <div class="skeleton-card"></div>
@@ -935,15 +938,14 @@ function searchByTag(tag) {
 
 function renderGenrePicker() {
     const genres = ['Malayalam', 'Pop', 'Rock', 'Jazz', 'News', 'Islamic', 'Classical', 'Hip-Hop', 'Electronic', 'Chillout'];
-    const picker = document.createElement('div');
-    picker.className = 'genre-picker-bar glass';
-    picker.innerHTML = `
-        <div class="explorer-field">
-            <label>Pick a Vibe</label>
-            <div class="genre-chips-container">
-                ${genres.map(g => `<button class="genre-chip" onclick="searchByTag('${g}')">${g}</button>`).join('')}
+    elements.genrePicker.innerHTML = `
+        <div class="genre-picker-bar glass">
+            <div class="explorer-field">
+                <label>Pick a Vibe</label>
+                <div class="genre-chips-container">
+                    ${genres.map(g => `<button class="genre-chip" onclick="searchByTag('${g}')">${g}</button>`).join('')}
+                </div>
             </div>
         </div>
     `;
-    elements.stationList.prepend(picker);
 }
