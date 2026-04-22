@@ -118,19 +118,17 @@ body::before {
 .logo-img {
     width: 54px;
     height: 54px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 50%;
-    background: rgba(0, 229, 255, 0.05);
     border: 1px solid var(--accent-glow);
 }
 
 .modal-logo {
     width: 120px;
     height: 120px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 50%;
     margin-bottom: 20px;
-    background: rgba(0, 229, 255, 0.05);
     border: 2px solid var(--accent);
     box-shadow: 0 0 20px var(--accent-glow);
 }
