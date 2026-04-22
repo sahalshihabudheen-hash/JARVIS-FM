@@ -320,7 +320,9 @@ function renderStations(stations) {
     const otherStations = stations.filter(s => s.lastcheckok !== 1 || !liveStations.includes(s));
 
     if (liveStations.length > 0) {
-        renderSection('Live Now', 'Stations with a verified active signal', liveStations);
+        // Hero Section for the very first live station
+        renderHero(liveStations[0]);
+        renderSection('Live Now', 'Stations with a verified active signal', liveStations.slice(1));
     }
 
     if (otherStations.length > 0) {
@@ -395,18 +397,51 @@ function renderSection(title, subtitle, stations) {
 }
 
 function showLoader() {
-    // Only show the big loader if the grid is empty (first load)
-    if (elements.stationList.children.length === 0 || elements.stationList.querySelector('.no-results') || elements.stationList.querySelector('.error')) {
-        elements.stationList.innerHTML = `
-            <div class="station-grid">
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
+    elements.stationList.innerHTML = `
+        <div class="station-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+    `;
+}
+
+function renderHero(station) {
+    const hero = document.createElement('div');
+    hero.className = 'hero-section glass';
+    
+    const artwork = station.favicon || '/logo.png';
+    const isPlaceholder = !station.favicon;
+
+    hero.innerHTML = `
+        <div class="hero-content">
+            <div class="hero-label">
+                <span class="pulse-dot"></span> Recommended For You
             </div>
-        `;
+            <h1>${station.name}</h1>
+            <p>${station.tags.split(',').slice(0, 3).join(' • ') || 'Global Radio'}</p>
+            <div class="hero-actions">
+                <button class="primary-btn hero-play-btn">
+                    <i data-lucide="play"></i> Listen Now
+                </button>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="hero-visual-container">
+                <img src="${artwork}" class="${isPlaceholder ? 'placeholder-logo' : ''}" alt="${station.name}">
+            </div>
+            <div class="hero-glow"></div>
+        </div>
+    `;
+
+    hero.querySelector('.hero-play-btn').onclick = () => playStation(station);
+    elements.stationList.prepend(hero);
+
+    if (window.lucide) {
+        lucide.createIcons({ root: hero });
     }
 }
 
