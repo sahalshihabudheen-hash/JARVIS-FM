@@ -191,6 +191,10 @@ async function fetchStations(type, query = '') {
         elements.sectionTitle.textContent = 'Peace & Serenity';
         elements.sectionSubtitle.textContent = 'Spiritual and calming signals from around the world';
 
+    } else if (type === 'tuner') {
+        renderTuner();
+        return;
+
     } else if (type === 'history') {
         renderStations(state.recentlyPlayed);
         elements.sectionTitle.textContent = 'Recently Played';
@@ -353,7 +357,7 @@ function renderStations(stations) {
     }
 }
 
-function renderSection(title, subtitle, stations) {
+function renderSection(title, subtitle, stations, targetContainer = null) {
     const section = document.createElement('div');
     section.className = 'grid-section';
     section.innerHTML = `
@@ -371,7 +375,6 @@ function renderSection(title, subtitle, stations) {
     
     stations.forEach((station, index) => {
         const card = document.createElement('div');
-        
         card.className = 'station-card glass';
 
         const artwork = station.favicon || '';
@@ -379,12 +382,9 @@ function renderSection(title, subtitle, stations) {
             ? `<img src="${artwork}" loading="lazy" onerror="this.src='/logo.png'; this.className='placeholder-logo'; this.onerror=null;" alt="${station.name}">`
             : `<img src="/logo.png" class="placeholder-logo" alt="JARVIS FM">`;
 
-        // Add contextual badges
         let badgeHtml = '';
-        if (title === 'Live Now') {
+        if (station.lastcheckok === 1) {
             badgeHtml = `<div class="card-badge badge-live">Live</div>`;
-        } else if (index < 2 && state.activeType === 'topvote') {
-            badgeHtml = `<div class="card-badge badge-popular"><i data-lucide="trending-up" style="width:10px;height:10px"></i> Popular</div>`;
         }
 
         card.innerHTML = `
@@ -405,15 +405,75 @@ function renderSection(title, subtitle, stations) {
         grid.appendChild(card);
     });
 
-    elements.stationList.appendChild(section);
+    if (targetContainer) {
+        targetContainer.innerHTML = '';
+        targetContainer.appendChild(section);
+    } else {
+        elements.stationList.appendChild(section);
+    }
 
     if (window.lucide) {
-        lucide.createIcons({
-            attrs: { class: 'lucide-icon' },
-            nameAttr: 'data-lucide',
-            root: grid
-        });
+        lucide.createIcons({ root: section });
     }
+}
+
+function renderTuner() {
+    elements.stationList.innerHTML = `
+        <div class="tuner-container glass">
+            <div class="tuner-display">
+                <span class="tuner-freq" id="tunerFreq">102.7</span>
+                <span class="tuner-unit">MHz</span>
+            </div>
+            <div class="tuner-controls">
+                <input type="range" min="87.5" max="108.0" step="0.1" value="102.7" class="tuner-slider" id="tunerSlider">
+                <div class="tuner-buttons">
+                    <button class="primary-btn tune-btn" id="tuneBtn">
+                        <i data-lucide="radio"></i> Tune Station
+                    </button>
+                </div>
+            </div>
+            <div class="tuner-status" id="tunerStatus">Adjust the dial to find your frequency</div>
+        </div>
+        <div id="tunerResults" class="station-grid-container"></div>
+    `;
+
+    const slider = document.getElementById('tunerSlider');
+    const freqDisplay = document.getElementById('tunerFreq');
+    const tuneBtn = document.getElementById('tuneBtn');
+    const status = document.getElementById('tunerStatus');
+    const resultsContainer = document.getElementById('tunerResults');
+
+    slider.oninput = () => {
+        freqDisplay.textContent = parseFloat(slider.value).toFixed(1);
+    };
+
+    tuneBtn.onclick = async () => {
+        const freq = freqDisplay.textContent;
+        status.textContent = `Scanning for ${freq} MHz...`;
+        tuneBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`${API_BASE}/stations/search?name=${freq}&limit=20&order=clickcount&reverse=true`, { signal: timeoutSignal(10000) });
+            const stations = await response.json();
+            
+            if (stations.length > 0) {
+                status.textContent = `Found ${stations.length} stations on ${freq} MHz`;
+                renderSection(`Stations on ${freq}`, `Broadcasts matching your frequency`, stations, resultsContainer);
+            } else {
+                status.textContent = `No stations found on ${freq} MHz. Try another frequency.`;
+                resultsContainer.innerHTML = '';
+            }
+        } catch (e) {
+            status.textContent = "Tuning failed. Please try again.";
+        } finally {
+            tuneBtn.disabled = false;
+        }
+    };
+
+    if (window.lucide) lucide.createIcons();
+    
+    elements.sectionTitle.textContent = 'Digital Tuner';
+    elements.sectionSubtitle.textContent = 'Manually dial in your favorite frequencies just like a real FM radio';
 }
 
 function showLoader() {
