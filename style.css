@@ -1575,3 +1575,57 @@ h2 {
     font-size: 0.9rem;
     color: var(--text-dim);
 }
+
+/* Tuner Filters */
+.tuner-filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.filter-toggle input {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    transition: 0.3s;
+    border: 1px solid var(--card-border);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 4px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.filter-toggle input:checked + .toggle-slider {
+    background: var(--accent);
+}
+
+.filter-toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+}

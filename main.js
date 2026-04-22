@@ -418,6 +418,9 @@ function renderSection(title, subtitle, stations, targetContainer = null) {
 }
 
 function renderTuner() {
+    const currentCountry = state.location?.country_name || 'India';
+    const currentCountryCode = state.location?.country_code || 'IN';
+
     elements.stationList.innerHTML = `
         <div class="tuner-container glass">
             <div class="tuner-display">
@@ -426,13 +429,20 @@ function renderTuner() {
             </div>
             <div class="tuner-controls">
                 <input type="range" min="87.5" max="108.0" step="0.1" value="102.7" class="tuner-slider" id="tunerSlider">
+                <div class="tuner-filters">
+                    <label class="filter-toggle">
+                        <input type="checkbox" id="localFilter" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Only search in ${currentCountry}</span>
+                    </label>
+                </div>
                 <div class="tuner-buttons">
                     <button class="primary-btn tune-btn" id="tuneBtn">
                         <i data-lucide="radio"></i> Tune Station
                     </button>
                 </div>
             </div>
-            <div class="tuner-status" id="tunerStatus">Adjust the dial to find your frequency</div>
+            <div class="tuner-status" id="tunerStatus">Adjust the dial to find local signals</div>
         </div>
         <div id="tunerResults" class="station-grid-container"></div>
     `;
@@ -441,6 +451,7 @@ function renderTuner() {
     const freqDisplay = document.getElementById('tunerFreq');
     const tuneBtn = document.getElementById('tuneBtn');
     const status = document.getElementById('tunerStatus');
+    const localFilter = document.getElementById('localFilter');
     const resultsContainer = document.getElementById('tunerResults');
 
     slider.oninput = () => {
@@ -449,18 +460,25 @@ function renderTuner() {
 
     tuneBtn.onclick = async () => {
         const freq = freqDisplay.textContent;
-        status.textContent = `Scanning for ${freq} MHz...`;
+        const isLocal = localFilter.checked;
+        
+        status.textContent = isLocal ? `Scanning for ${freq} MHz in ${currentCountry}...` : `Global Scan for ${freq} MHz...`;
         tuneBtn.disabled = true;
         
         try {
-            const response = await fetch(`${API_BASE}/stations/search?name=${freq}&limit=20&order=clickcount&reverse=true`, { signal: timeoutSignal(10000) });
+            let url = `${API_BASE}/stations/search?name=${freq}&limit=40&order=clickcount&reverse=true`;
+            if (isLocal) {
+                url += `&countrycode=${currentCountryCode}`;
+            }
+
+            const response = await fetch(url, { signal: timeoutSignal(10000) });
             const stations = await response.json();
             
             if (stations.length > 0) {
-                status.textContent = `Found ${stations.length} stations on ${freq} MHz`;
-                renderSection(`Stations on ${freq}`, `Broadcasts matching your frequency`, stations, resultsContainer);
+                status.textContent = `Found ${stations.length} stations on ${freq} MHz ${isLocal ? 'locally' : 'globally'}`;
+                renderSection(`Stations on ${freq}`, `Signals found ${isLocal ? 'in ' + currentCountry : 'worldwide'}`, stations, resultsContainer);
             } else {
-                status.textContent = `No stations found on ${freq} MHz. Try another frequency.`;
+                status.textContent = `No stations found on ${freq} MHz ${isLocal ? 'in ' + currentCountry : ''}. Try turning off the local filter.`;
                 resultsContainer.innerHTML = '';
             }
         } catch (e) {
