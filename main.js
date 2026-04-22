@@ -290,8 +290,10 @@ async function detectLocation() {
         const data = await response.json();
         state.location = data;
         localStorage.setItem('userLocation', JSON.stringify(data));
-        elements.locationText.textContent = `${data.city}, ${data.country_name}`;
-        console.log('Location detected:', data.country_code);
+        elements.locationText.textContent = data.region 
+            ? `${data.city}, ${data.region}` 
+            : `${data.city}, ${data.country_name}`;
+        console.log('Location detected:', data.city, data.region);
     } catch (e) {
         console.warn('Location detection failed, using Global Mode');
         if (!state.location) elements.locationText.textContent = 'Global Mode';
