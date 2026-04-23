@@ -117,6 +117,7 @@ window.onunhandledrejection = function(event) {
 // --- Firebase Logic ---
 let auth, db, user = null;
 let appReady = false;
+let pollingInterval = null;
 
 async function init() {
     setupEventListeners();
@@ -148,7 +149,14 @@ async function init() {
 
             if (firebaseUser) {
                 console.log('User signed in:', firebaseUser.email, 'Verified:', firebaseUser.emailVerified);
+                
                 if (firebaseUser.emailVerified) {
+                    // Clear polling if user is verified
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+
                     // Signed in and verified
                     syncUserData(firebaseUser);
                     authModal.classList.add('hidden');
@@ -171,9 +179,30 @@ async function init() {
                     const emailDisplay = document.getElementById('verify-email-display');
                     if (emailDisplay) emailDisplay.textContent = firebaseUser.email;
                     
+                    // Start polling for verification status if not already polling
+                    if (!pollingInterval) {
+                        pollingInterval = setInterval(async () => {
+                            if (auth.currentUser) {
+                                await auth.currentUser.reload();
+                                if (auth.currentUser.emailVerified) {
+                                    console.log('Auto-detected verification!');
+                                    // This will trigger onAuthStateChanged again in some SDKs, 
+                                    // but manually checking here for speed.
+                                    location.reload(); // Refresh to clean up all state
+                                }
+                            }
+                        }, 3000);
+                    }
+                    
                     showToast('Please verify your email to continue.', 'warning');
                 }
             } else {
+                // Clear polling on logout
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+
                 console.log('No user signed in.');
                 // Not signed in
                 gateOverlay.classList.remove('hidden');
