@@ -929,6 +929,9 @@ function setupEventListeners() {
         overlay.onclick = toggleMenu;
     }
 
+    // Desktop Sidebar Collapse
+    setupSidebarCollapse();
+
     // Audio Player Sync
     elements.audioPlayer.onplay = () => {
         state.isPlaying = true;
@@ -1395,6 +1398,33 @@ function handleAuthError(error) {
             message = error.message;
     }
     showToast(message, 'error');
+}
+
+function setupSidebarCollapse() {
+    const sidebar = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('sidebar-collapse');
+    if (!sidebar || !collapseBtn) return;
+
+    // Load saved state
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+        sidebar.classList.add('collapsed');
+        const icon = collapseBtn.querySelector('i');
+        if (icon) icon.setAttribute('data-lucide', 'chevron-right');
+        if (window.lucide) lucide.createIcons({ root: collapseBtn });
+    }
+
+    collapseBtn.onclick = () => {
+        const collapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sidebarCollapsed', collapsed);
+        
+        // Update Icon
+        const icon = collapseBtn.querySelector('i');
+        if (icon) {
+            icon.setAttribute('data-lucide', collapsed ? 'chevron-right' : 'chevron-left');
+            if (window.lucide) lucide.createIcons({ root: collapseBtn });
+        }
+    };
 }
 
 async function handleAuthAction() {
