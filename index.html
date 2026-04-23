@@ -65,9 +65,12 @@
                 <button class="nav-item" data-type="tuner">
                     <i data-lucide="radio"></i> Digital Tuner
                 </button>
-                <div class="sidebar-divider"></div>
                 <button class="nav-item" data-type="history">
                     <i data-lucide="history"></i> Recently Played
+                </button>
+                <div class="sidebar-divider"></div>
+                <button class="nav-item" id="auth-nav-btn">
+                    <i data-lucide="user"></i> <span id="auth-btn-text">Sign In</span>
                 </button>
             </nav>
             <div class="sidebar-divider"></div>
@@ -192,6 +195,82 @@
                 </div>
             </div>
         </div>
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <i data-lucide="shield-check" class="auth-icon-lg"></i>
+                    <h2 id="auth-title">Sign In</h2>
+                    <p id="auth-subtitle">Join the JARVIS FM community</p>
+                </div>
+                
+                <div class="auth-forms">
+                    <button id="google-signin" class="google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google/light/18.png" alt="Google">
+                        Continue with Google
+                    </button>
+                    
+                    <div class="auth-divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <form id="email-auth-form" class="auth-form">
+                        <div class="form-group">
+                            <input type="email" id="auth-email" placeholder="Email Address" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="auth-password" placeholder="Password" required>
+                        </div>
+                        <button type="submit" id="auth-submit-btn" class="primary-btn">Sign In</button>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <p id="auth-switch-text">Don't have an account? <a href="#" id="switch-auth-mode">Create one</a></p>
+                    <button class="close-modal-btn" id="close-auth">Maybe Later</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Sent Modal -->
+        <div id="verify-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <i data-lucide="mail" class="auth-icon-lg"></i>
+                    <h2>Verify Your Email</h2>
+                    <p>We've sent a verification link to your email. Please check your inbox and verify your account to continue.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="primary-btn" id="check-verify-status">I've Verified</button>
+                    <button class="close-modal-btn" id="close-verify">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Profile Modal -->
+        <div id="profile-modal" class="modal-overlay hidden">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <div class="profile-avatar-lg" id="profile-avatar-lg"></div>
+                    <h2 id="profile-name">User Name</h2>
+                    <p id="profile-email">user@example.com</p>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span id="stat-favorites">0</span>
+                        <label>Favorites</label>
+                    </div>
+                    <div class="stat-item">
+                        <span id="stat-history">0</span>
+                        <label>Played</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary-btn" id="logout-btn">Log Out</button>
+                    <button class="close-modal-btn" id="close-profile">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Expanded Player Overlay -->
@@ -235,6 +314,14 @@
             </div>
         </div>
     </div>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        window.FirebaseSDK = { initializeApp, getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut, getFirestore, doc, setDoc, getDoc };
+    </script>
     <script type="module" src="./main.js"></script>
     <script>
         // Initialize Lucide icons

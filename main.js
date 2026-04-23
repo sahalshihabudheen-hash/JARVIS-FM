@@ -116,9 +116,34 @@ window.onunhandledrejection = function(event) {
 
 // --- Initialization ---
 
+// --- Firebase Logic ---
+let auth, db, user = null;
+
 async function init() {
     setupEventListeners();
     
+    // Initialize Firebase
+    try {
+        const { initializeApp, getAuth, onAuthStateChanged, getFirestore } = window.FirebaseSDK;
+        // Import config
+        const module = await import('./firebase-config.js');
+        const firebaseConfig = module.default;
+        
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        onAuthStateChanged(auth, (firebaseUser) => {
+            user = firebaseUser;
+            updateAuthUI(firebaseUser);
+            if (firebaseUser) {
+                syncUserData(firebaseUser);
+            }
+        });
+    } catch (e) {
+        console.warn('Firebase failed to initialize. Check your config.', e);
+    }
+
     // Non-blocking location detection
     detectLocation();
 
@@ -1052,8 +1077,141 @@ function renderGenreHub() {
     });
 }
 
+// --- Auth UI & Data Sync ---
+function updateAuthUI(user) {
+    const authBtnText = document.getElementById('auth-btn-text');
+    
+    if (user) {
+        if (authBtnText) authBtnText.textContent = user.displayName || 'Profile';
+        const navBtn = document.getElementById('auth-nav-btn');
+        if (navBtn) {
+            navBtn.innerHTML = `
+                <div class="profile-avatar-sm" style="background-image: url(${user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'})"></div>
+                <span id="auth-btn-text">${user.displayName || 'Profile'}</span>
+            `;
+        }
+    } else {
+        if (authBtnText) authBtnText.textContent = 'Sign In';
+        const navBtn = document.getElementById('auth-nav-btn');
+        if (navBtn) navBtn.innerHTML = `<i data-lucide="user"></i> <span id="auth-btn-text">Sign In</span>`;
+        if (window.lucide) lucide.createIcons({ root: navBtn });
+    }
+}
+
 window.searchByTag = function(tag) {
     state.activeType = 'tag';
     state.activeTag = tag;
     fetchStations('tag', tag);
 };
+
+async function syncUserData(user) {
+    if (!db) return;
+    try {
+        const { doc, getDoc, setDoc } = window.FirebaseSDK;
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            if (data.preferredGenres) {
+                state.preferredGenres = data.preferredGenres;
+                localStorage.setItem('preferredGenres', JSON.stringify(data.preferredGenres));
+                if (state.activeType === 'home') fetchStations('home');
+            }
+        } else {
+            // New user, save current local preferences
+            await setDoc(userRef, {
+                email: user.email,
+                displayName: user.displayName,
+                preferredGenres: state.preferredGenres,
+                lastSeen: new Date().toISOString()
+            });
+        }
+    } catch (e) {
+        console.warn('Data sync failed:', e);
+    }
+}
+
+// Auth Event Listeners
+function setupAuthListeners() {
+    const { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } = window.FirebaseSDK;
+    
+    const authModal = document.getElementById('auth-modal');
+    const profileModal = document.getElementById('profile-modal');
+    const authNavBtn = document.getElementById('auth-nav-btn');
+    
+    authNavBtn.onclick = () => {
+        if (user) {
+            // Show Profile
+            document.getElementById('profile-name').textContent = user.displayName || 'User';
+            document.getElementById('profile-email').textContent = user.email;
+            if (user.photoURL) document.getElementById('profile-avatar-lg').style.backgroundImage = `url(${user.photoURL})`;
+            profileModal.classList.remove('hidden');
+        } else {
+            authModal.classList.remove('hidden');
+        }
+    };
+
+    document.getElementById('close-auth').onclick = () => authModal.classList.add('hidden');
+    document.getElementById('close-profile').onclick = () => profileModal.classList.add('hidden');
+
+    // Google Sign In
+    document.getElementById('google-signin').onclick = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+            authModal.classList.add('hidden');
+            showToast(`Welcome back, ${auth.currentUser.displayName}!`, 'success');
+        } catch (e) {
+            showToast(e.message, 'error');
+        }
+    };
+
+    // Email/Password Auth
+    const emailForm = document.getElementById('email-auth-form');
+    const switchModeBtn = document.getElementById('switch-auth-mode');
+    let isSignUp = false;
+
+    switchModeBtn.onclick = (e) => {
+        e.preventDefault();
+        isSignUp = !isSignUp;
+        document.getElementById('auth-title').textContent = isSignUp ? 'Create Account' : 'Sign In';
+        document.getElementById('auth-submit-btn').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+        document.getElementById('auth-switch-text').innerHTML = isSignUp 
+            ? `Already have an account? <a href="#" id="switch-auth-mode">Sign In</a>`
+            : `Don't have an account? <a href="#" id="switch-auth-mode">Create one</a>`;
+        setupAuthListeners(); // Re-attach listener for the new link
+    };
+
+    emailForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        
+        try {
+            if (isSignUp) {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await sendEmailVerification(cred.user);
+                authModal.classList.add('hidden');
+                document.getElementById('verify-modal').classList.remove('hidden');
+            } else {
+                await signInWithEmailAndPassword(auth, email, password);
+                authModal.classList.add('hidden');
+            }
+        } catch (e) {
+            showToast(e.message, 'error');
+        }
+    };
+
+    document.getElementById('logout-btn').onclick = async () => {
+        await signOut(auth);
+        profileModal.classList.add('hidden');
+        showToast('Logged out successfully', 'info');
+    };
+
+    document.getElementById('close-verify').onclick = () => document.getElementById('verify-modal').classList.add('hidden');
+    document.getElementById('check-verify-status').onclick = () => location.reload();
+}
+
+// Call this inside setupEventListeners or init
+setTimeout(setupAuthListeners, 1000); // Small delay to ensure Firebase is ready
