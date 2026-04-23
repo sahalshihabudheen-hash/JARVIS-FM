@@ -137,25 +137,42 @@ async function init() {
         auth = getAuth(app);
         db = getFirestore(app);
         
-        onAuthStateChanged(auth, (firebaseUser) => {
+        onAuthStateChanged(auth, async (firebaseUser) => {
             user = firebaseUser;
             updateAuthUI(firebaseUser);
             
+            const gateOverlay = document.getElementById('auth-gate-overlay');
+            const authModal = document.getElementById('auth-modal');
+            const verifyModal = document.getElementById('verify-modal');
+            const appElement = document.getElementById('app');
+
             if (firebaseUser) {
-                // User is signed in — show the app
-                syncUserData(firebaseUser);
-                authModal.classList.add('hidden');
-                gateOverlay.classList.add('hidden');
-                document.getElementById('app').classList.add('ready');
-                if (!appReady) {
-                    appReady = true;
-                    bootApp();
+                if (firebaseUser.emailVerified) {
+                    // Signed in and verified
+                    syncUserData(firebaseUser);
+                    authModal.classList.add('hidden');
+                    verifyModal.classList.add('hidden');
+                    gateOverlay.classList.add('hidden');
+                    appElement.classList.add('ready');
+                    
+                    if (!appReady) {
+                        appReady = true;
+                        bootApp();
+                    }
+                } else {
+                    // Signed in but NOT verified
+                    gateOverlay.classList.remove('hidden');
+                    verifyModal.classList.remove('hidden');
+                    authModal.classList.add('hidden');
+                    appElement.classList.remove('ready');
+                    showToast('Please verify your email to continue.', 'warning');
                 }
             } else {
-                // Not signed in — keep gate visible and hide app
+                // Not signed in
                 gateOverlay.classList.remove('hidden');
                 authModal.classList.remove('hidden');
-                document.getElementById('app').classList.remove('ready');
+                verifyModal.classList.add('hidden');
+                appElement.classList.remove('ready');
             }
         });
     } catch (e) {
@@ -1170,6 +1187,9 @@ function setupAuthListeners() {
             if (user.photoURL) document.getElementById('profile-avatar-lg').style.backgroundImage = `url(${user.photoURL})`;
             profileModal.classList.remove('hidden');
         } else {
+            // Reset to Sign In mode when opening modal
+            isSignUp = true; // Set to true so the switch logic toggles it to false
+            switchModeBtn.click(); 
             authModal.classList.remove('hidden');
         }
     };
@@ -1263,7 +1283,33 @@ function setupAuthListeners() {
     if (closeVerify) closeVerify.onclick = () => document.getElementById('verify-modal').classList.add('hidden');
     
     const checkVerifyStatus = document.getElementById('check-verify-status');
-    if (checkVerifyStatus) checkVerifyStatus.onclick = () => location.reload();
+    if (checkVerifyStatus) {
+        checkVerifyStatus.onclick = async () => {
+            if (auth.currentUser) {
+                await auth.currentUser.reload();
+                if (auth.currentUser.emailVerified) {
+                    showToast('Email verified! Welcome aboard.', 'success');
+                    // onAuthStateChanged will handle the UI transition
+                } else {
+                    showToast('Still not verified. Please check your inbox.', 'warning');
+                }
+            }
+        };
+    }
+
+    const resendBtn = document.getElementById('resend-verify');
+    if (resendBtn) {
+        resendBtn.onclick = async () => {
+            if (auth.currentUser) {
+                try {
+                    await sendEmailVerification(auth.currentUser);
+                    showToast('Verification email resent!', 'info');
+                } catch (e) {
+                    showToast(e.message, 'error');
+                }
+            }
+        };
+    }
 }
 
 
