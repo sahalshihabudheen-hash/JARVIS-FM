@@ -167,6 +167,10 @@ async function init() {
                     verifyModal.classList.remove('hidden');
                     authModal.classList.add('hidden');
                     appElement.classList.remove('ready');
+                    
+                    const emailDisplay = document.getElementById('verify-email-display');
+                    if (emailDisplay) emailDisplay.textContent = firebaseUser.email;
+                    
                     showToast('Please verify your email to continue.', 'warning');
                 }
             } else {

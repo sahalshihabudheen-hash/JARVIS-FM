@@ -211,6 +211,9 @@
                 <form id="email-auth-form" class="auth-form">
                     <div class="form-group"><input type="email" id="auth-email" placeholder="Email Address" required></div>
                     <div class="form-group"><input type="password" id="auth-password" placeholder="Password" required></div>
+                    <div class="form-options" id="auth-options">
+                        <a href="#" id="forgot-password">Forgot Password?</a>
+                    </div>
                     <button type="submit" id="auth-submit-btn" class="primary-pill-btn">📩 Sign In</button>
                 </form>
 
@@ -230,7 +233,7 @@
         <div class="modal-content glass">
             <div class="modal-header">
                 <h2>Verify Your Email</h2>
-                <p>We sent a verification link. Check your inbox and click it to continue.</p>
+                <p>We sent a verification link to <strong id="verify-email-display">your email</strong>. Check your inbox and click it to continue.</p>
             </div>
             <div class="modal-footer">
                 <button class="primary-btn" id="check-verify-status">I've Verified</button>
@@ -301,10 +304,10 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
-        window.FirebaseSDK = { initializeApp, getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut, getFirestore, doc, setDoc, getDoc };
+        window.FirebaseSDK = { initializeApp, getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut, getFirestore, doc, setDoc, getDoc };
     </script>
     <script type="module" src="./main.js"></script>
     <script>
