@@ -114,14 +114,18 @@ window.onunhandledrejection = function(event) {
     showToast(`Error: ${errorMsg}`, 'warning');
 };
 
-// --- Initialization ---
-
 // --- Firebase Logic ---
 let auth, db, user = null;
 let appReady = false;
 
 async function init() {
     setupEventListeners();
+
+    // Show auth gate IMMEDIATELY — hide only when signed in
+    const gateOverlay = document.getElementById('auth-gate-overlay');
+    const authModal = document.getElementById('auth-modal');
+    gateOverlay.classList.remove('hidden');
+    authModal.classList.remove('hidden');
     
     // Initialize Firebase
     try {
@@ -140,22 +144,21 @@ async function init() {
             if (firebaseUser) {
                 // User is signed in — show the app
                 syncUserData(firebaseUser);
-                document.getElementById('auth-modal').classList.add('hidden');
-                document.getElementById('auth-gate-overlay').classList.add('hidden');
+                authModal.classList.add('hidden');
+                gateOverlay.classList.add('hidden');
                 if (!appReady) {
                     appReady = true;
                     bootApp();
                 }
             } else {
-                // Not signed in — show full-screen auth gate
-                document.getElementById('auth-gate-overlay').classList.remove('hidden');
-                document.getElementById('auth-modal').classList.remove('hidden');
+                // Not signed in — keep gate visible
+                gateOverlay.classList.remove('hidden');
+                authModal.classList.remove('hidden');
             }
         });
     } catch (e) {
-        console.warn('Firebase not initialized, running in guest mode.', e);
-        // If Firebase fails, allow app to load anyway
-        bootApp();
+        console.warn('Firebase not initialized.', e);
+        // Keep gate showing — do NOT bypass auth on error
     }
 
     setupVisualizer();
