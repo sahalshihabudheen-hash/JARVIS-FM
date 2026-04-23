@@ -163,31 +163,40 @@ async function fetchStations(type, query = '') {
 
     if (type === 'home') {
         renderGenreHub();
-        const genres = state.preferredGenres.length > 0 ? state.preferredGenres.slice(0, 3) : ['pop', 'rock', 'jazz'];
+        const genres = state.preferredGenres.length > 0 ? state.preferredGenres.slice(0, 4) : ['pop', 'rock', 'jazz'];
         showLoader();
         
         try {
-            const fetchPromises = genres.map(tag => 
-                fetch(`${API_BASE}/stations/search?tag=${tag}&order=clickcount&reverse=true&limit=20`)
-                    .then(res => res.json())
-                    .catch(() => [])
-            );
+            const results = await Promise.all(genres.map(async (tag) => {
+                const res = await fetch(`${API_BASE}/stations/search?tag=${tag}&order=clickcount&reverse=true&limit=15`);
+                const data = await res.json();
+                return { tag, stations: data };
+            }));
 
-            const results = await Promise.all(fetchPromises);
-            let allStations = results.flat();
+            elements.stationList.innerHTML = '';
             
-            // Shuffle
-            allStations = allStations.sort(() => Math.random() - 0.5);
-            
-            state.stations = allStations;
-            renderStations(allStations);
-            
+            // 1. Mixed Recommendations Carousel at top
+            const allStations = results.flatMap(r => r.stations).sort(() => Math.random() - 0.5);
+            if (allStations.length > 0) {
+                renderRecommendations(allStations.slice(0, 8));
+            }
+
+            // 2. Separate section for each genre
+            results.forEach(res => {
+                if (res.stations.length > 0) {
+                    renderSection(
+                        `${res.tag.charAt(0).toUpperCase() + res.tag.slice(1)} Hub`, 
+                        `Handpicked ${res.tag} signals for your daily vibe`, 
+                        res.stations
+                    );
+                }
+            });
+
             elements.sectionTitle.textContent = 'For You';
-            elements.sectionSubtitle.textContent = `Personalized selection based on your interest in ${genres.join(', ')}`;
+            elements.sectionSubtitle.textContent = `A personalized world of radio based on your interests`;
             return;
         } catch (e) {
             console.error('Home fetch failed:', e);
-            // Fallback to topvote if everything fails
             type = 'topvote';
         }
     }
