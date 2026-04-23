@@ -167,34 +167,35 @@
 
             <audio id="audio-player" style="display:none"></audio>
         </footer>
-
-        <!-- Onboarding Modal -->
-        <div id="onboarding-modal" class="modal-overlay hidden">
-            <div class="modal-content glass">
-                <div class="modal-header">
-                    <img src="/LOGO.gif" alt="JARVIS FM" class="modal-logo">
-                    <h2>Welcome to JARVIS FM</h2>
-                    <p>What kind of music do you vibe with? Pick at least 3.</p>
-                </div>
-                <div class="genre-selection-grid" id="onboarding-genres">
-                    <button class="onboarding-genre" data-tag="pop">Pop</button>
-                    <button class="onboarding-genre" data-tag="rock">Rock</button>
-                    <button class="onboarding-genre" data-tag="jazz">Jazz</button>
-                    <button class="onboarding-genre" data-tag="electronic">EDM</button>
-                    <button class="onboarding-genre" data-tag="classical">Classical</button>
-                    <button class="onboarding-genre" data-tag="lofi">Lofi</button>
-                    <button class="onboarding-genre" data-tag="hiphop">Hip Hop</button>
-                    <button class="onboarding-genre" data-tag="relax">Relax</button>
-                    <button class="onboarding-genre" data-tag="news">News</button>
-                    <button class="onboarding-genre" data-tag="islamic">Islamic</button>
-                    <button class="onboarding-genre" data-tag="malayalam">Malayalam</button>
-                    <button class="onboarding-genre" data-tag="bollywood">Bollywood</button>
-                </div>
-                <div class="modal-footer">
-                    <button id="finish-onboarding" class="primary-btn" disabled>Start Listening</button>
-                </div>
+    </div>
+    <!-- Onboarding Modal (outside #app) -->
+    <div id="onboarding-modal" class="modal-overlay hidden">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <img src="./public/logo.gif" class="modal-logo" alt="JARVIS FM" onerror="this.style.display='none'">
+                <h2>Welcome to JARVIS FM</h2>
+                <p>What kind of music do you vibe with? Pick at least 3.</p>
+            </div>
+            <div class="onboarding-grid">
+                <button class="onboarding-genre" data-tag="pop">Pop</button>
+                <button class="onboarding-genre" data-tag="rock">Rock</button>
+                <button class="onboarding-genre" data-tag="jazz">Jazz</button>
+                <button class="onboarding-genre" data-tag="edm">EDM</button>
+                <button class="onboarding-genre" data-tag="classical">Classical</button>
+                <button class="onboarding-genre" data-tag="lofi">Lofi</button>
+                <button class="onboarding-genre" data-tag="hiphop">Hip Hop</button>
+                <button class="onboarding-genre" data-tag="relax">Relax</button>
+                <button class="onboarding-genre" data-tag="news">News</button>
+                <button class="onboarding-genre" data-tag="islamic">Islamic</button>
+                <button class="onboarding-genre" data-tag="malayalam">Malayalam</button>
+                <button class="onboarding-genre" data-tag="bollywood">Bollywood</button>
+            </div>
+            <div class="modal-footer">
+                <button id="finish-onboarding" class="primary-btn" disabled>Start Listening</button>
             </div>
         </div>
+    </div>
+
     <!-- ===== AUTH MODALS (outside #app) ===== -->
     <div id="auth-gate-overlay"></div>
     <div id="auth-modal" class="modal-overlay hidden">

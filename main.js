@@ -146,14 +146,16 @@ async function init() {
                 syncUserData(firebaseUser);
                 authModal.classList.add('hidden');
                 gateOverlay.classList.add('hidden');
+                document.getElementById('app').classList.add('ready');
                 if (!appReady) {
                     appReady = true;
                     bootApp();
                 }
             } else {
-                // Not signed in — keep gate visible
+                // Not signed in — keep gate visible and hide app
                 gateOverlay.classList.remove('hidden');
                 authModal.classList.remove('hidden');
+                document.getElementById('app').classList.remove('ready');
             }
         });
     } catch (e) {
