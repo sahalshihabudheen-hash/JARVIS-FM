@@ -195,13 +195,16 @@
                 </div>
             </div>
         </div>
+        <!-- Full-screen Auth Gate (blocks app until signed in) -->
+        <div id="auth-gate-overlay"></div>
+
         <!-- Auth Modal -->
         <div id="auth-modal" class="modal-overlay hidden">
-            <div class="modal-content glass">
+            <div class="modal-content glass auth-gate-modal">
                 <div class="modal-header">
-                    <i data-lucide="shield-check" class="auth-icon-lg"></i>
-                    <h2 id="auth-title">Sign In</h2>
-                    <p id="auth-subtitle">Join the JARVIS FM community</p>
+                    <img src="./public/logo.gif" class="modal-logo" alt="JARVIS FM" onerror="this.style.display='none'">
+                    <h2 id="auth-title">Welcome to JARVIS FM</h2>
+                    <p id="auth-subtitle">Sign in to unlock your personalized radio experience 🎵</p>
                 </div>
                 
                 <div class="auth-forms">
@@ -227,7 +230,6 @@
                 
                 <div class="modal-footer">
                     <p id="auth-switch-text">Don't have an account? <a href="#" id="switch-auth-mode">Create one</a></p>
-                    <button class="close-modal-btn" id="close-auth">Maybe Later</button>
                 </div>
             </div>
         </div>

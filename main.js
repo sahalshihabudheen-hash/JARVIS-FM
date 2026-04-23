@@ -118,6 +118,7 @@ window.onunhandledrejection = function(event) {
 
 // --- Firebase Logic ---
 let auth, db, user = null;
+let appReady = false;
 
 async function init() {
     setupEventListeners();
@@ -125,7 +126,6 @@ async function init() {
     // Initialize Firebase
     try {
         const { initializeApp, getAuth, onAuthStateChanged, getFirestore } = window.FirebaseSDK;
-        // Import config
         const module = await import('./firebase-config.js');
         const firebaseConfig = module.default;
         
@@ -136,14 +136,32 @@ async function init() {
         onAuthStateChanged(auth, (firebaseUser) => {
             user = firebaseUser;
             updateAuthUI(firebaseUser);
+            
             if (firebaseUser) {
+                // User is signed in — show the app
                 syncUserData(firebaseUser);
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('auth-gate-overlay').classList.add('hidden');
+                if (!appReady) {
+                    appReady = true;
+                    bootApp();
+                }
+            } else {
+                // Not signed in — show full-screen auth gate
+                document.getElementById('auth-gate-overlay').classList.remove('hidden');
+                document.getElementById('auth-modal').classList.remove('hidden');
             }
         });
     } catch (e) {
-        console.warn('Firebase failed to initialize. Check your config.', e);
+        console.warn('Firebase not initialized, running in guest mode.', e);
+        // If Firebase fails, allow app to load anyway
+        bootApp();
     }
 
+    setupVisualizer();
+}
+
+function bootApp() {
     // Non-blocking location detection
     detectLocation();
 
@@ -157,12 +175,10 @@ async function init() {
     if (state.preferredGenres.length === 0) {
         showOnboarding();
     } else {
-        // Fetch fresh data in the background
         fetchStations('home');
     }
-
-    setupVisualizer();
 }
+
 
 // --- API Logic ---
 

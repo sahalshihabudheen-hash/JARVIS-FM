@@ -1,12 +1,12 @@
 // Firebase configuration
-// Replace the values below with your own config from Firebase Console
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDAIZzdKCFJcz3W4VtJp22oIsaL9mrtUD8",
+    authDomain: "jarvis-fm-783b7.firebaseapp.com",
+    projectId: "jarvis-fm-783b7",
+    storageBucket: "jarvis-fm-783b7.firebasestorage.app",
+    messagingSenderId: "651318137062",
+    appId: "1:651318137062:web:9c73527666531217a52b27",
+    measurementId: "G-57SJ34N81Y"
 };
 
 export default firebaseConfig;
