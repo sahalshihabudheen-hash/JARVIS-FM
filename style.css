@@ -2204,10 +2204,10 @@ h2 {
 #auth-gate-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(7, 9, 13, 0.92);
+    background: rgba(7, 9, 13, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    z-index: 900;
+    z-index: 2000;
 }
 
 #auth-gate-overlay.hidden {
@@ -2215,7 +2215,7 @@ h2 {
 }
 
 #auth-modal {
-    z-index: 950;
+    z-index: 2100;
 }
 
 .auth-gate-modal {
