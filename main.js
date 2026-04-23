@@ -1191,38 +1191,63 @@ function setupAuthListeners() {
     // Email/Password Auth
     const emailForm = document.getElementById('email-auth-form');
     const switchModeBtn = document.getElementById('switch-auth-mode');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
     let isSignUp = false;
 
-    switchModeBtn.onclick = (e) => {
-        e.preventDefault();
-        isSignUp = !isSignUp;
-        document.getElementById('auth-title').textContent = isSignUp ? 'Create Account' : 'Sign In';
-        document.getElementById('auth-submit-btn').textContent = isSignUp ? 'Sign Up' : 'Sign In';
-        document.getElementById('auth-switch-text').innerHTML = isSignUp 
-            ? `Already have an account? <a href="#" id="switch-auth-mode">Sign In</a>`
-            : `Don't have an account? <a href="#" id="switch-auth-mode">Create one</a>`;
-        setupAuthListeners(); // Re-attach listener for the new link
-    };
-
-    emailForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
-        
-        try {
-            if (isSignUp) {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await sendEmailVerification(cred.user);
-                authModal.classList.add('hidden');
-                document.getElementById('verify-modal').classList.remove('hidden');
-            } else {
-                await signInWithEmailAndPassword(auth, email, password);
-                authModal.classList.add('hidden');
+    if (switchModeBtn) {
+        switchModeBtn.onclick = (e) => {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            
+            // Update UI for the mode
+            if (authSubtitle) {
+                authSubtitle.textContent = isSignUp ? 'Create your new radio profile' : 'Sign in to unlock your personalized radio experience';
             }
-        } catch (e) {
-            showToast(e.message, 'error');
-        }
-    };
+            if (authSubmitBtn) {
+                authSubmitBtn.textContent = isSignUp ? '📩 Create Account' : '📩 Sign In';
+            }
+            
+            const switchLink = document.getElementById('switch-auth-mode');
+            if (switchLink) {
+                switchLink.textContent = isSignUp ? 'Sign In' : 'Create one';
+            }
+            
+            const switchPrefix = isSignUp ? 'Already have an account? ' : "Don't have an account? ";
+            const switchText = document.getElementById('auth-switch-text');
+            if (switchText) {
+                switchText.firstChild.textContent = switchPrefix;
+            }
+        };
+    }
+
+    if (emailForm) {
+        emailForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            
+            try {
+                if (isSignUp) {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    if (cred.user) {
+                        await sendEmailVerification(cred.user);
+                        authModal.classList.add('hidden');
+                        const verifyModal = document.getElementById('verify-modal');
+                        if (verifyModal) verifyModal.classList.remove('hidden');
+                        showToast('Verification email sent!', 'info');
+                    }
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    authModal.classList.add('hidden');
+                    showToast('Signed in successfully!', 'success');
+                }
+            } catch (e) {
+                console.error('Auth error:', e);
+                showToast(e.message, 'error');
+            }
+        };
+    }
 
     document.getElementById('logout-btn').onclick = async () => {
         await signOut(auth);
