@@ -158,15 +158,29 @@ body::before {
     border: 1px solid var(--accent-glow);
 }
 
-.modal-logo {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+.modal-logo-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px auto;
     border-radius: 50%;
-    margin: 0 auto 20px auto;
-    display: block;
+    overflow: hidden;
     border: 2px solid var(--accent);
-    box-shadow: 0 0 25px var(--accent-glow);
+    box-shadow: 0 0 20px var(--accent-glow);
+    background: #000;
+}
+
+.modal-logo-new {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-title-main {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: white;
+    letter-spacing: 2px;
 }
 
 .nav-links {
