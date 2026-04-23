@@ -163,6 +163,7 @@ async function init() {
         // Keep gate showing — do NOT bypass auth on error
     }
 
+    setupAuthListeners();
     setupVisualizer();
 }
 
@@ -1173,8 +1174,11 @@ function setupAuthListeners() {
         }
     };
 
-    document.getElementById('close-auth').onclick = () => authModal.classList.add('hidden');
-    document.getElementById('close-profile').onclick = () => profileModal.classList.add('hidden');
+    const closeAuth = document.getElementById('close-auth');
+    if (closeAuth) closeAuth.onclick = () => authModal.classList.add('hidden');
+    
+    const closeProfile = document.getElementById('close-profile');
+    if (closeProfile) closeProfile.onclick = () => profileModal.classList.add('hidden');
 
     // Google Sign In
     document.getElementById('google-signin').onclick = async () => {
@@ -1255,9 +1259,11 @@ function setupAuthListeners() {
         showToast('Logged out successfully', 'info');
     };
 
-    document.getElementById('close-verify').onclick = () => document.getElementById('verify-modal').classList.add('hidden');
-    document.getElementById('check-verify-status').onclick = () => location.reload();
+    const closeVerify = document.getElementById('close-verify');
+    if (closeVerify) closeVerify.onclick = () => document.getElementById('verify-modal').classList.add('hidden');
+    
+    const checkVerifyStatus = document.getElementById('check-verify-status');
+    if (checkVerifyStatus) checkVerifyStatus.onclick = () => location.reload();
 }
 
-// Call this inside setupEventListeners or init
-setTimeout(setupAuthListeners, 1000); // Small delay to ensure Firebase is ready
+
