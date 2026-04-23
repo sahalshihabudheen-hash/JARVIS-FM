@@ -771,8 +771,31 @@ function setupEventListeners() {
             const type = item.getAttribute('data-type');
             state.activeType = type;
             fetchStations(type);
+            
+            // Mobile: Close menu after selection
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+            }
         };
     });
+
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (menuToggle && sidebar && overlay) {
+        const toggleMenu = () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        };
+
+        menuToggle.onclick = toggleMenu;
+        overlay.onclick = toggleMenu;
+    }
 
     // Audio Player Sync
     elements.audioPlayer.onplay = () => {

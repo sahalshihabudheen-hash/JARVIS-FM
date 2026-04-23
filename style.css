@@ -109,6 +109,10 @@ body::before {
     padding: 0 10px;
 }
 
+.menu-toggle-btn {
+    display: none;
+}
+
 .logo span {
     background: linear-gradient(135deg, #fff 0%, #00e5ff 100%);
     -webkit-background-clip: text;
@@ -1002,18 +1006,66 @@ h2 {
 
 /* Small Screens */
 @media (max-width: 768px) {
-    .sidebar { display: none; }
+    .sidebar { 
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        z-index: 1001;
+        transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex; /* Override display: none */
+        background: rgba(7, 9, 13, 0.95);
+        backdrop-filter: blur(20px);
+        width: 280px;
+        border-right: 1px solid var(--card-border);
+    }
+    
+    .sidebar.active {
+        left: 0;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .menu-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        cursor: pointer;
+        color: var(--text-main);
+        flex-shrink: 0;
+    }
+
+    .menu-toggle-btn i { width: 24px; height: 24px; }
     
     #app { padding: 10px; gap: 10px; }
     
     .top-bar { 
-        flex-direction: column; 
-        align-items: stretch; 
+        flex-direction: row; /* Keep hamburger and search in row if possible, or adjust stacking */
+        flex-wrap: wrap;
+        align-items: center; 
         gap: 12px; 
         margin-bottom: 20px;
     }
-    
-    .search-container { max-width: none; }
+
+    .search-container { flex: 1; min-width: 200px; max-width: none; }
     
     .location-status { width: 100%; justify-content: center; }
 

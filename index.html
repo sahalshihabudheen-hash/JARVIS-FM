@@ -76,6 +76,9 @@
         <!-- Main Content Area -->
         <main class="content">
             <header class="top-bar">
+                <button id="mobile-menu-toggle" class="menu-toggle-btn glass">
+                    <i data-lucide="menu"></i>
+                </button>
                 <div class="search-container glass">
                     <i data-lucide="search"></i>
                     <input type="text" id="station-search" placeholder="Search stations, genres or countries...">
@@ -85,6 +88,7 @@
                     <span id="location-text">Detecting Location...</span>
                 </div>
             </header>
+            <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
             <div id="genrePicker" class="genre-picker-container"></div>
             <div id="locationExplorer" class="location-explorer-container"></div>
