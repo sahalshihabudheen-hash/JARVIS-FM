@@ -1174,6 +1174,7 @@ async function syncUserData(user) {
 // Auth Event Listeners
 function setupAuthListeners() {
     const { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } = window.FirebaseSDK;
+    let isSignUp = false;
     
     const authModal = document.getElementById('auth-modal');
     const profileModal = document.getElementById('profile-modal');
@@ -1217,8 +1218,6 @@ function setupAuthListeners() {
     const switchModeBtn = document.getElementById('switch-auth-mode');
     const authSubtitle = document.getElementById('auth-subtitle');
     const authSubmitBtn = document.getElementById('auth-submit-btn');
-    let isSignUp = false;
-
     if (switchModeBtn) {
         switchModeBtn.onclick = (e) => {
             e.preventDefault();
