@@ -147,6 +147,7 @@ async function init() {
             const appElement = document.getElementById('app');
 
             if (firebaseUser) {
+                console.log('User signed in:', firebaseUser.email, 'Verified:', firebaseUser.emailVerified);
                 if (firebaseUser.emailVerified) {
                     // Signed in and verified
                     syncUserData(firebaseUser);
@@ -161,6 +162,7 @@ async function init() {
                     }
                 } else {
                     // Signed in but NOT verified
+                    console.log('Blocking access: Email not verified.');
                     gateOverlay.classList.remove('hidden');
                     verifyModal.classList.remove('hidden');
                     authModal.classList.add('hidden');
@@ -168,6 +170,7 @@ async function init() {
                     showToast('Please verify your email to continue.', 'warning');
                 }
             } else {
+                console.log('No user signed in.');
                 // Not signed in
                 gateOverlay.classList.remove('hidden');
                 authModal.classList.remove('hidden');
@@ -1173,7 +1176,7 @@ async function syncUserData(user) {
 
 // Auth Event Listeners
 function setupAuthListeners() {
-    const { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signOut } = window.FirebaseSDK;
+    const { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signOut } = window.FirebaseSDK;
     let isSignUp = false;
     
     const authModal = document.getElementById('auth-modal');
@@ -1209,7 +1212,7 @@ function setupAuthListeners() {
             authModal.classList.add('hidden');
             showToast(`Welcome back, ${auth.currentUser.displayName}!`, 'success');
         } catch (e) {
-            showToast(e.message, 'error');
+            handleAuthError(e);
         }
     };
 
@@ -1266,8 +1269,25 @@ function setupAuthListeners() {
                     showToast('Signed in successfully!', 'success');
                 }
             } catch (e) {
-                console.error('Auth error:', e);
-                showToast(e.message, 'error');
+                handleAuthError(e);
+            }
+        };
+    }
+
+    const forgotPasswordBtn = document.getElementById('forgot-password');
+    if (forgotPasswordBtn) {
+        forgotPasswordBtn.onclick = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            if (!email) {
+                showToast('Please enter your email address first.', 'warning');
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showToast('Password reset email sent!', 'success');
+            } catch (e) {
+                handleAuthError(e);
             }
         };
     }
@@ -1311,4 +1331,32 @@ function setupAuthListeners() {
     }
 }
 
-
+function handleAuthError(error) {
+    console.error('Auth Error Code:', error.code);
+    let message = 'An authentication error occurred.';
+    switch (error.code) {
+        case 'auth/email-already-in-use':
+            message = 'This email is already registered. Please sign in instead.';
+            break;
+        case 'auth/invalid-email':
+            message = 'Please enter a valid email address.';
+            break;
+        case 'auth/weak-password':
+            message = 'Password is too weak. Please use at least 6 characters.';
+            break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+            message = 'Invalid email or password. Please try again.';
+            break;
+        case 'auth/too-many-requests':
+            message = 'Too many failed attempts. Please try again later.';
+            break;
+        case 'auth/popup-closed-by-user':
+            message = 'Sign-in popup was closed before completion.';
+            break;
+        default:
+            message = error.message;
+    }
+    showToast(message, 'error');
+}
