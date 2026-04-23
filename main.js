@@ -1320,12 +1320,26 @@ function setupAuthListeners() {
     if (resendBtn) {
         resendBtn.onclick = async () => {
             if (auth.currentUser) {
+                const originalText = resendBtn.textContent;
+                resendBtn.disabled = true;
+                resendBtn.textContent = 'Sending...';
+                
                 try {
                     await sendEmailVerification(auth.currentUser);
-                    showToast('Verification email resent!', 'info');
+                    showToast('Verification email resent! Please check your inbox.', 'info');
+                    resendBtn.textContent = 'Link Sent!';
+                    setTimeout(() => {
+                        resendBtn.textContent = originalText;
+                        resendBtn.disabled = false;
+                    }, 3000);
                 } catch (e) {
-                    showToast(e.message, 'error');
+                    console.error('Resend error:', e);
+                    handleAuthError(e);
+                    resendBtn.textContent = originalText;
+                    resendBtn.disabled = false;
                 }
+            } else {
+                showToast('Please sign in to resend the link.', 'warning');
             }
         };
     }
