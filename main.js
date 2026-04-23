@@ -949,6 +949,7 @@ function setupEventListeners() {
         state.preferredGenres = selected;
         localStorage.setItem('preferredGenres', JSON.stringify(selected));
         elements.onboardingModal.classList.add('hidden');
+        elements.onboardingModal.style.display = 'none';
         state.activeType = 'home';
         // Force refresh nav items active state
         elements.navItems.forEach(i => i.classList.remove('active'));
@@ -983,6 +984,7 @@ function setupEventListeners() {
 
 function showOnboarding() {
     elements.onboardingModal.classList.remove('hidden');
+    elements.onboardingModal.style.display = 'flex';
 }
 
 // --- Visualizer Logic ---
