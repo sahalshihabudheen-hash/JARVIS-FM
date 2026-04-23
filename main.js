@@ -245,8 +245,6 @@ async function fetchStations(type, query = '') {
             console.error('Home fetch failed:', e);
             type = 'topvote';
         }
-    }
-
     } else if (type === 'topvote') {
         url = `${API_BASE}/stations/topvote/60`;
         elements.sectionTitle.textContent = 'Trending Stations';
