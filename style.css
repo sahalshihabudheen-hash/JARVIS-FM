@@ -159,14 +159,12 @@ body::before {
 }
 
 .modal-logo {
-    width: 140px;
-    height: 140px;
-    object-fit: contain;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
     border-radius: 50%;
     margin: 0 auto 20px auto;
     display: block;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
     border: 2px solid var(--accent);
     box-shadow: 0 0 25px var(--accent-glow);
 }
