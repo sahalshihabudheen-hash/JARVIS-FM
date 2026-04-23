@@ -137,6 +137,9 @@ async function init() {
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
+
+        // Handle verification/reset links from URL
+        handleAuthAction();
         
         onAuthStateChanged(auth, async (firebaseUser) => {
             user = firebaseUser;
@@ -1392,4 +1395,26 @@ function handleAuthError(error) {
             message = error.message;
     }
     showToast(message, 'error');
+}
+
+async function handleAuthAction() {
+    const { applyActionCode } = window.FirebaseSDK;
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const oobCode = urlParams.get('oobCode');
+
+    if (mode === 'verifyEmail' && oobCode) {
+        try {
+            await applyActionCode(auth, oobCode);
+            showToast('Email verified successfully! Enjoy JARVIS FM.', 'success');
+            // Clean URL and reload to ensure fresh state
+            window.history.replaceState({}, document.title, window.location.pathname);
+            if (auth.currentUser) await auth.currentUser.reload();
+        } catch (e) {
+            handleAuthError(e);
+        }
+    } else if (mode === 'resetPassword' && oobCode) {
+        // We can handle password reset UI here if needed
+        showToast('Password reset link detected. Feature coming soon!', 'info');
+    }
 }
