@@ -1334,20 +1334,6 @@ function setupAuthListeners() {
     const closeVerify = document.getElementById('close-verify');
     if (closeVerify) closeVerify.onclick = () => document.getElementById('verify-modal').classList.add('hidden');
     
-    const checkVerifyStatus = document.getElementById('check-verify-status');
-    if (checkVerifyStatus) {
-        checkVerifyStatus.onclick = async () => {
-            if (auth.currentUser) {
-                await auth.currentUser.reload();
-                if (auth.currentUser.emailVerified) {
-                    showToast('Email verified! Welcome aboard.', 'success');
-                    // onAuthStateChanged will handle the UI transition
-                } else {
-                    showToast('Still not verified. Please check your inbox.', 'warning');
-                }
-            }
-        };
-    }
 
     const resendBtn = document.getElementById('resend-verify');
     if (resendBtn) {
