@@ -153,11 +153,12 @@
 
             <!-- Right: Volume -->
             <div class="player-right">
-                <i data-lucide="volume-2" class="volume-icon"></i>
+                <button class="vol-btn" id="vol-down"><i data-lucide="minus"></i></button>
                 <div class="volume-slider-wrapper">
                     <div class="volume-progress" id="volume-progress"></div>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.7">
                 </div>
+                <button class="vol-btn" id="vol-up"><i data-lucide="plus"></i></button>
                 <span id="volume-percent">70%</span>
             </div>
 
@@ -225,11 +226,12 @@
             </div>
             
             <div class="expanded-volume">
-                <i data-lucide="volume-2"></i>
+                <button class="vol-btn-lg" id="exp-vol-down"><i data-lucide="minus"></i></button>
                 <div class="volume-slider-wrapper">
                     <div class="volume-progress" id="exp-volume-progress"></div>
                     <input type="range" id="exp-volume-slider" min="0" max="1" step="0.01" value="0.7">
                 </div>
+                <button class="vol-btn-lg" id="exp-vol-up"><i data-lucide="plus"></i></button>
             </div>
         </div>
     </div>

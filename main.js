@@ -163,12 +163,34 @@ async function fetchStations(type, query = '') {
 
     if (type === 'home') {
         renderGenreHub();
-        const primaryGenre = state.preferredGenres[0] || 'mixed';
-        url = `${API_BASE}/stations/search?tag=${primaryGenre}&order=clickcount&reverse=true&limit=60`;
-        elements.sectionTitle.textContent = 'For You';
-        elements.sectionSubtitle.textContent = state.preferredGenres.length > 0 
-            ? `Personalized selection based on your interest in ${state.preferredGenres.join(', ')}`
-            : 'Explore trending global hits curated for you';
+        const genres = state.preferredGenres.length > 0 ? state.preferredGenres.slice(0, 3) : ['pop', 'rock', 'jazz'];
+        showLoader();
+        
+        try {
+            const fetchPromises = genres.map(tag => 
+                fetch(`${API_BASE}/stations/search?tag=${tag}&order=clickcount&reverse=true&limit=20`)
+                    .then(res => res.json())
+                    .catch(() => [])
+            );
+
+            const results = await Promise.all(fetchPromises);
+            let allStations = results.flat();
+            
+            // Shuffle
+            allStations = allStations.sort(() => Math.random() - 0.5);
+            
+            state.stations = allStations;
+            renderStations(allStations);
+            
+            elements.sectionTitle.textContent = 'For You';
+            elements.sectionSubtitle.textContent = `Personalized selection based on your interest in ${genres.join(', ')}`;
+            return;
+        } catch (e) {
+            console.error('Home fetch failed:', e);
+            // Fallback to topvote if everything fails
+            type = 'topvote';
+        }
+    }
 
     } else if (type === 'topvote') {
         url = `${API_BASE}/stations/topvote/60`;
@@ -872,7 +894,12 @@ function setupEventListeners() {
         state.preferredGenres = selected;
         localStorage.setItem('preferredGenres', JSON.stringify(selected));
         elements.onboardingModal.classList.add('hidden');
-        fetchStations('topvote');
+        state.activeType = 'home';
+        // Force refresh nav items active state
+        elements.navItems.forEach(i => i.classList.remove('active'));
+        const homeNav = document.querySelector('[data-type="home"]');
+        if (homeNav) homeNav.classList.add('active');
+        fetchStations('home');
     };
 
     // Expanded Player Listeners
@@ -892,6 +919,11 @@ function setupEventListeners() {
     elements.expVolume.oninput = (e) => {
         updateVolume(parseFloat(e.target.value));
     };
+
+    const expVolUp = document.getElementById('exp-vol-up');
+    const expVolDown = document.getElementById('exp-vol-down');
+    if (expVolUp) expVolUp.onclick = () => updateVolume(Math.min(1, state.volume + 0.1));
+    if (expVolDown) expVolDown.onclick = () => updateVolume(Math.max(0, state.volume - 0.1));
 }
 
 function showOnboarding() {
@@ -973,13 +1005,27 @@ function renderGenreHub() {
         { name: 'News', tag: 'news' }
     ];
 
+    // Sort to put preferred genres at the top
+    const sortedGenres = [...genres].sort((a, b) => {
+        const aPref = state.preferredGenres.includes(a.tag);
+        const bPref = state.preferredGenres.includes(b.tag);
+        if (aPref && !bPref) return -1;
+        if (!aPref && bPref) return 1;
+        return 0;
+    });
+
     elements.genrePicker.innerHTML = `
         <div class="genre-picker-bar glass">
             <div class="genre-picker-header">
                 <h3>Explore Genres</h3>
             </div>
             <div class="genre-chips-container">
-                ${genres.map(g => `<button class="genre-chip ${state.activeTag === g.tag ? 'active' : ''}" data-tag="${g.tag}">${g.name}</button>`).join('')}
+                ${sortedGenres.map(g => {
+                    const isPref = state.preferredGenres.includes(g.tag);
+                    return `<button class="genre-chip ${state.activeTag === g.tag ? 'active' : ''} ${isPref ? 'preferred' : ''}" data-tag="${g.tag}">
+                        ${isPref ? '<span class="pref-dot"></span>' : ''} ${g.name}
+                    </button>`;
+                }).join('')}
             </div>
         </div>
     `;
